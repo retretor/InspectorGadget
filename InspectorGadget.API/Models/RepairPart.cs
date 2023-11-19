@@ -13,6 +13,8 @@ public sealed partial class RepairPart
     public int MinAllowedCount { get; set; }
 
     public int Cost { get; set; }
+    
+    public RepairPartCondition RepairPartCondition { get; set; }
 
     public ICollection<PartForRepairPart> PartForRepairParts { get; set; } = new List<PartForRepairPart>();
 }

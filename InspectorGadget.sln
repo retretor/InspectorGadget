@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InspectorGadget", "InspectorGadget\InspectorGadget.csproj", "{1B268868-A9E2-4D76-8190-1FE265E63505}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InspectorGadget.API", "InspectorGadget.API\InspectorGadget.API.csproj", "{1B268868-A9E2-4D76-8190-1FE265E63505}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

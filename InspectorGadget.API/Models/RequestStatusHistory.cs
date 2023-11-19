@@ -8,5 +8,7 @@ public sealed partial class RequestStatusHistory
 
     public int RepairRequestId { get; set; }
 
+    public RequestStatus RequestStatus { get; set; }
+
     public RepairRequest RepairRequest { get; set; } = null!;
 }

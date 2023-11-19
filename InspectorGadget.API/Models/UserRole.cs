@@ -1,7 +1,8 @@
 ﻿namespace InspectorGadget.Models;
 
-public enum EmployeePosition
+public enum UserRole
 {
+    CLIENT,
     ADMIN,
     RECEPTIONIST,
     MASTER
