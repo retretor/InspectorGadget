@@ -1,20 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace InspectorGadget.Db;
+namespace InspectorGadget.Db.ModelRepositories;
 
-public class DbRepository
+public interface IDbRepository
 {
-    private readonly InspectorGadgetContext _context;
-
-    public DbRepository()
-    {
-        _context = new InspectorGadgetContext(new DbContextOptions<InspectorGadgetContext>());
-        _context.Database.EnsureCreated();
-    }
+    protected InspectorGadgetContext Context { get; }
     
     public async Task<IEnumerable<T>?> GetAllAsync<T>() where T : class
     {
-        var entities = await _context.Set<T>().ToListAsync();
+        var entities = await Context.Set<T>().ToListAsync();
         if (entities.Count == 0)
         {
             Console.WriteLine($"No {typeof(T).Name} found");
@@ -27,7 +21,7 @@ public class DbRepository
     
     public async Task<T?> GetAsync<T>(int id) where T : class
     {
-        var entities = await _context.Set<T>().ToListAsync();
+        var entities = await Context.Set<T>().ToListAsync();
         var entity = entities.FirstOrDefault(e => e.GetType().GetProperty("Id")?.GetValue(e)?.Equals(id) == true);
         if (entity == null)
         {
@@ -40,7 +34,7 @@ public class DbRepository
     
     public async Task<T?> UpdateAsync<T>(int id, object dto) where T : class
     {
-        var entities = await _context.Set<T>().ToListAsync();
+        var entities = await Context.Set<T>().ToListAsync();
         var entityToUpdate = entities.FirstOrDefault(e => e.GetType().GetProperty("Id")?.GetValue(e)?.Equals(id) == true);
         if (entityToUpdate == null)
         {
@@ -58,13 +52,13 @@ public class DbRepository
             }
         }
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
         return entityToUpdate;
     }
     
     public async Task<T?> CreateAsync<T>(object dto) where T : class
     {
-        var entities = await _context.Set<T>().ToListAsync();
+        var entities = await Context.Set<T>().ToListAsync();
         var id = (int)(dto.GetType().GetProperty("Id")?.GetValue(dto) ?? 0);
         if (entities.Any(e => e.GetType().GetProperty("Id")?.GetValue(e)?.Equals(id) == true))
         {
@@ -73,22 +67,29 @@ public class DbRepository
         }
 
         var entityType = typeof(T);
-        var constructor = entityType.GetConstructor(dto.GetType().GetProperties().Select(p => p.PropertyType).ToArray());
-        if (constructor != null)
+        var entity = Activator.CreateInstance(entityType);
+        if (entity == null)
         {
-            var constructorParams = dto.GetType().GetProperties().Select(p => p.GetValue(dto)).ToArray();
-            var newEntity = constructor.Invoke(constructorParams);
-            _context.Set<T>().Add((T)newEntity);
-            await _context.SaveChangesAsync();
-            return (T)newEntity;
+            Console.WriteLine($"Failed to create {typeof(T).Name}");
+            return null;
         }
-
-        return null;
+        var dtoProperties = dto.GetType().GetProperties();
+        foreach (var property in dtoProperties)
+        {
+            var entityProperty = entity.GetType().GetProperty(property.Name);
+            if (entityProperty != null && entityProperty.CanWrite)
+            {
+                entityProperty.SetValue(entity, property.GetValue(dto));
+            }
+        }
+        Context.Set<T>().Add((T)entity);
+        await Context.SaveChangesAsync();
+        return (T)entity;
     }
 
     public async Task DeleteAsync<T>(int id) where T : class
     {
-        var entities = await _context.Set<T>().ToListAsync();
+        var entities = await Context.Set<T>().ToListAsync();
         var entityToDelete = entities.FirstOrDefault(e => e.GetType().GetProperty("Id")?.GetValue(e)?.Equals(id) == true);
         if (entityToDelete == null)
         {
@@ -96,7 +97,7 @@ public class DbRepository
             return;
         }
 
-        _context.Set<T>().Remove(entityToDelete);
-        await _context.SaveChangesAsync();
+        Context.Set<T>().Remove(entityToDelete);
+        await Context.SaveChangesAsync();
     }
 }

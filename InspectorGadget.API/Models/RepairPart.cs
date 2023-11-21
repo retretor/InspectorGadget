@@ -1,4 +1,6 @@
-﻿namespace InspectorGadget.Models;
+﻿using InspectorGadget.DTOs;
+
+namespace InspectorGadget.Models;
 
 public sealed partial class RepairPart
 {
@@ -14,7 +16,7 @@ public sealed partial class RepairPart
 
     public int Cost { get; set; }
     
-    public RepairPartCondition RepairPartCondition { get; set; }
+    public RepairPartCondition Condition { get; set; }
 
     public ICollection<PartForRepairPart> PartForRepairParts { get; set; } = new List<PartForRepairPart>();
 }

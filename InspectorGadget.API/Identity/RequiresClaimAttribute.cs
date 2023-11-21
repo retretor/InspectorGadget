@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using InspectorGadget.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace InspectorGadget.Identity;
@@ -7,12 +8,14 @@ namespace InspectorGadget.Identity;
 public class RequiresClaimAttribute : Attribute, IAuthorizationFilter
 {
     private readonly string _claimName;
-    private readonly string _claimValue;
+    private readonly object _claimValues;
+    private readonly bool _isAllowSelfView;
 
-    public RequiresClaimAttribute(string claimName, string claimValue)
+    public RequiresClaimAttribute(string claimName, object claimValues, bool isAllowSelfView = false)
     {
         _claimName = claimName;
-        _claimValue = claimValue;
+        _claimValues = claimValues;
+        _isAllowSelfView = isAllowSelfView;
     }
 
     public void OnAuthorization(AuthorizationFilterContext context)
@@ -24,10 +27,38 @@ public class RequiresClaimAttribute : Attribute, IAuthorizationFilter
             return;
         }
 
-        var isClaimed = user.HasClaim(_claimName, _claimValue);
-        if (!isClaimed)
+        var claimValues = CastClaimValues();
+        if (claimValues == null)
+        {
+            context.Result = new BadRequestResult();
+            return;
+        }
+
+        var isClaimed = false;
+        foreach (var claimValue in claimValues)
+        {
+            isClaimed = user.HasClaim(_claimName, claimValue);
+            if (isClaimed)
+            {
+                break;
+            }
+        }
+
+        if (!isClaimed && !_isAllowSelfView)
         {
             context.Result = new ForbidResult();
         }
+    }
+
+    private string[]? CastClaimValues()
+    {
+        return _claimValues switch
+        {
+            string[] stringArray => stringArray,
+            string stringValue => new[] { stringValue },
+            UserRole[] roleArray => roleArray.Select(role => role.ToString()).ToArray(),
+            UserRole role => new[] { role.ToString() },
+            _ => null
+        };
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public partial class AllowedRepairTypesForEmployee
+public sealed partial class AllowedRepairTypesForEmployee
 {
     public int Id { get; set; }
 
@@ -8,7 +8,7 @@ public partial class AllowedRepairTypesForEmployee
 
     public int EmployeeId { get; set; }
 
-    public virtual Employee Employee { get; set; } = null!;
+    public Employee Employee { get; set; } = null!;
 
-    public virtual RepairTypeForDevice RepairTypeForDevice { get; set; } = null!;
+    public RepairTypeForDevice RepairTypeForDevice { get; set; } = null!;
 }

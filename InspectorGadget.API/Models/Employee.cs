@@ -6,8 +6,6 @@ public sealed partial class Employee
 
     public int DbUserId { get; set; }
 
-    public UserRole UserRole { get; set; }
-
     public ICollection<AllowedRepairTypesForEmployee> AllowedRepairTypesForEmployees { get; set; } =
         new List<AllowedRepairTypesForEmployee>();
 

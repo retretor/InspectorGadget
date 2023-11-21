@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public partial class RepairTypesList
+public sealed partial class RepairTypesList
 {
     public int Id { get; set; }
 
@@ -8,7 +8,7 @@ public partial class RepairTypesList
 
     public int RepairRequestId { get; set; }
 
-    public virtual RepairRequest RepairRequest { get; set; } = null!;
+    public RepairRequest RepairRequest { get; set; } = null!;
 
-    public virtual RepairTypeForDevice RepairTypeForDevice { get; set; } = null!;
+    public RepairTypeForDevice RepairTypeForDevice { get; set; } = null!;
 }

@@ -2,7 +2,8 @@
 
 namespace InspectorGadget.DTOs;
 
-public record struct DbUserAuthDto(int Id, string FirstName, string SecondName, string Login, string PasswordHash,
+public record struct DbUserAuthDto(int Id, string FirstName, string SecondName, string TelephoneNumber, string Login,
+    string PasswordHash,
     UserRole Role);
 
 public record struct Records(int RepairTypeForDeviceId, int EmployeeId);
@@ -16,7 +17,11 @@ public record struct EmployeeDto(string FirstName, string SecondName, string Tel
 
 public record struct PartForRepairPartDto(int PartCount, int RepairTypeForDeviceId, int RepairPartId);
 
-public record struct RepairPartDto(string Name, string Specification, int CurrentCount, int MinAllowedCount, int Cost);
+public record struct RepairPartStringDto(string Name, string Specification, int CurrentCount, int MinAllowedCount, int Cost,
+    string Condition);
+
+public record struct RepairPartDto(string Name, string Specification, int CurrentCount, int MinAllowedCount, int Cost,
+    RepairPartCondition Condition);
 
 public record struct RepairRequestDto(int DeviceId, int ClientId, int? EmployeeId, string SerialNumber);
 
@@ -27,3 +32,5 @@ public record struct RepairTypeForDeviceDto(int Cost, int Time, int RepairTypeId
 public record struct RepairTypesListDto(int RepairTypeForDeviceId, int RepairRequestId);
 
 public record struct RequestStatusHistoryDto(DateTime Date, int RepairRequestId);
+
+public record struct AllowedRepairTypesForEmployeeDto(int RepairTypeForDeviceId, int EmployeeId);

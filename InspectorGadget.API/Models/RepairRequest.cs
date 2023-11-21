@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public partial class RepairRequest
+public sealed partial class RepairRequest
 {
     public int Id { get; set; }
 
@@ -12,13 +12,13 @@ public partial class RepairRequest
 
     public string SerialNumber { get; set; } = null!;
 
-    public virtual Client Client { get; set; } = null!;
+    public Client Client { get; set; } = null!;
 
-    public virtual Device Device { get; set; } = null!;
+    public Device Device { get; set; } = null!;
 
-    public virtual Employee? Employee { get; set; }
+    public Employee? Employee { get; set; }
 
-    public virtual ICollection<RepairTypesList> RepairTypesLists { get; set; } = new List<RepairTypesList>();
+    public ICollection<RepairTypesList> RepairTypesLists { get; set; } = new List<RepairTypesList>();
 
-    public virtual ICollection<RequestStatusHistory> RequestStatusHistories { get; set; } = new List<RequestStatusHistory>();
+    public ICollection<RequestStatusHistory> RequestStatusHistories { get; set; } = new List<RequestStatusHistory>();
 }

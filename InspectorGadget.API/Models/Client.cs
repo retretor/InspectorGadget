@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public partial class Client
+public sealed partial class Client
 {
     public int Id { get; set; }
 
@@ -8,7 +8,7 @@ public partial class Client
 
     public int DbUserId { get; set; }
 
-    public virtual DbUser DbUser { get; set; } = null!;
+    public DbUser DbUser { get; set; } = null!;
 
-    public virtual ICollection<RepairRequest> RepairRequests { get; set; } = new List<RepairRequest>();
+    public ICollection<RepairRequest> RepairRequests { get; set; } = new List<RepairRequest>();
 }

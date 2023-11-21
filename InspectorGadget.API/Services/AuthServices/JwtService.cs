@@ -4,7 +4,7 @@ using System.Text;
 using InspectorGadget.DTOs;
 using Microsoft.IdentityModel.Tokens;
 
-namespace InspectorGadget.Services;
+namespace InspectorGadget.Services.AuthServices;
 
 public class JwtService
 {
@@ -26,7 +26,8 @@ public class JwtService
         var claims = new List<Claim>
         {
             new(ClaimTypes.Name, user.Login),
-            new(ClaimTypes.Role, user.Role.ToString())
+            new(ClaimTypes.Role, user.Role.ToString()),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString())
         };
         
         var jwt = new JwtSecurityToken(
