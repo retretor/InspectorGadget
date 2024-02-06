@@ -4,7 +4,9 @@ using InspectorGadget.Models;
 
 namespace InspectorGadget.Services.ModelServices;
 
-public class RequestStatusHistoryService : IEntityService<RequestStatusHistory, RequestStatusHistoryDto>
+public class RequestStatusHistoryService : EntityService<RequestStatusHistory, RequestStatusHistoryDto>
 {
-    public IDbRepository Repository { get; } = new RequestStatusHistoryRepository();
+    public RequestStatusHistoryService(RequestStatusHistoryRepository repository) : base(repository)
+    {
+    }
 }

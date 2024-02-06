@@ -13,7 +13,7 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class RepairTypeController : ControllerBase
 {
-    private readonly IEntityService<RepairType, RepairTypeDto> _service;
+    private readonly RepairTypeService _service;
 
     public RepairTypeController(RepairTypeService service)
     {

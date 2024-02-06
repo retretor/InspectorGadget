@@ -13,7 +13,7 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class RepairPartController : ControllerBase
 {
-    private readonly IEntityService<RepairPart, RepairPartDto> _service;
+    private readonly RepairPartService _service;
 
     public RepairPartController(RepairPartService service)
     {
@@ -62,22 +62,8 @@ public class RepairPartController : ControllerBase
 
     [RequiresClaim(ClaimTypes.Role, UserRole.ADMIN)]
     [HttpPost]
-    public async Task<ActionResult<RepairPart>> PostRepairPart(RepairPartStringDto repairPartStringDto)
+    public async Task<ActionResult<RepairPart>> PostRepairPart(RepairPartDto repairPartDto)
     {
-        if (!Enum.TryParse(repairPartStringDto.Condition, out RepairPartCondition condition))
-        {
-            return BadRequest("Invalid condition value");
-        }
-        
-        var repairPartDto = new RepairPartDto
-        {
-            Name = repairPartStringDto.Name,
-            Specification = repairPartStringDto.Specification,
-            CurrentCount = repairPartStringDto.CurrentCount,
-            MinAllowedCount = repairPartStringDto.MinAllowedCount,
-            Cost = repairPartStringDto.Cost,
-            Condition = condition
-        };
         var createdRepairPart = await _service.Create(repairPartDto);
         if (createdRepairPart == null)
         {

@@ -13,14 +13,14 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class RepairRequestController : ControllerBase
 {
-    private readonly IEntityService<RepairRequest, RepairRequestDto> _service;
+    private readonly RepairRequestService _service;
 
     public RepairRequestController(RepairRequestService service)
     {
         _service = service;
     }
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER, UserRole.RECEPTIONIST})]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RepairRequest>>> GetRepairRequests()
     {
@@ -33,7 +33,7 @@ public class RepairRequestController : ControllerBase
         return Ok(repairRequests);
     }
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER, UserRole.RECEPTIONIST}, true)]
     [HttpGet("{id}")]
     public async Task<ActionResult<RepairRequest>> GetRepairRequest(int id)
     {
@@ -47,7 +47,7 @@ public class RepairRequestController : ControllerBase
         return Ok(repairRequest);
     }
 
-    [RequiresClaim(ClaimTypes.Role, UserRole.ADMIN)]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER, UserRole.RECEPTIONIST}, true)]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutRepairRequest(int id, RepairRequestDto repairRequestDto)
     {
@@ -60,7 +60,7 @@ public class RepairRequestController : ControllerBase
         return NoContent();
     }
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.CLIENT, UserRole.RECEPTIONIST})]
     [HttpPost]
     public async Task<ActionResult<RepairRequest>> PostRepairRequest(RepairRequestDto repairRequestDto)
     {

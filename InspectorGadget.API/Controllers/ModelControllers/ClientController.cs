@@ -13,16 +13,16 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class ClientController : ControllerBase
 {
-    private readonly IEntityService<Client, ClientDto> _service;
+    private readonly ClientService _service;
 
     public ClientController(ClientService service)
     {
         _service = service;
     }
 
-    [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN, UserRole.RECEPTIONIST }, true)]
+    [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN, UserRole.RECEPTIONIST })]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Client>>> GetClients()
+    public async Task<ActionResult<IEnumerable<ClientGetDto>>> GetClients()
     {
         var clients = await _service.Get();
         if (clients == null)
@@ -35,7 +35,7 @@ public class ClientController : ControllerBase
 
     [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN, UserRole.RECEPTIONIST }, true)]
     [HttpGet("{id}")]
-    public async Task<ActionResult<Client>> GetClient(int id)
+    public async Task<ActionResult<ClientGetDto>> GetClient(int id)
     {
         var client = await _service.Get(id);
 
@@ -49,7 +49,7 @@ public class ClientController : ControllerBase
 
     [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN, UserRole.RECEPTIONIST }, true)]
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutClient(int id, ClientDto clientDto)
+    public async Task<IActionResult> PutClient(int id, UpdateClientDto clientDto)
     {
         var updatedClient = await _service.Update(id, clientDto);
         if (updatedClient == null)
@@ -59,21 +59,7 @@ public class ClientController : ControllerBase
 
         return NoContent();
     }
-
-
-    [AllowAnonymous]
-    [HttpPost]
-    public async Task<ActionResult<Client>> PostClient(ClientDto client)
-    {
-        var createdClient = await _service.Create(client);
-        if (createdClient == null)
-        {
-            return BadRequest();
-        }
-
-        return CreatedAtAction("GetClient", new { id = createdClient.Id }, createdClient);
-    }
-
+    
 
     [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN, UserRole.RECEPTIONIST }, true)]
     [HttpDelete("{id}")]

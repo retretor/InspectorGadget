@@ -1,0 +1,352 @@
+﻿using Application.Common.Interfaces;
+using Domain.Entities.Basic;
+using Domain.Entities.Composite;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure.Data;
+
+public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
+{
+    public InspectorGadgetDbContext()
+    {
+    }
+
+    public InspectorGadgetDbContext(DbContextOptions<InspectorGadgetDbContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<AllowedRepairTypesForEmployee> AllowedRepairTypesForEmployees { get; set; } = null!;
+
+    public virtual DbSet<Client> Clients { get; set; } = null!;
+
+    public virtual DbSet<DbUser> DbUsers { get; set; } = null!;
+
+    public virtual DbSet<Device> Devices { get; set; } = null!;
+
+    public virtual DbSet<Employee> Employees { get; set; } = null!;
+
+    public virtual DbSet<PartForRepairType> PartForRepairTypes { get; set; } = null!;
+
+    public virtual DbSet<RepairPart> RepairParts { get; set; } = null!;
+
+    public virtual DbSet<RepairRequest> RepairRequests { get; set; } = null!;
+
+    public virtual DbSet<RepairType> RepairTypes { get; set; } = null!;
+
+    public virtual DbSet<RepairTypeForDevice> RepairTypeForDevices { get; set; } = null!;
+
+    public virtual DbSet<RepairTypesList> RepairTypesLists { get; set; } = null!;
+
+    public virtual DbSet<RequestStatusHistory> RequestStatusHistories { get; set; } = null!;
+
+    // TODO: Add more methods for the stored procedures
+    public virtual IQueryable<ClientInfoResult> GetClientInfo(int? inputId) =>
+        FromExpression(() => GetClientInfo((int?)inputId));
+
+    public virtual IQueryable<EmployeeInfoResult> GetEmployeeInfo(int? inputId) =>
+        FromExpression(() => GetEmployeeInfo((int?)inputId));
+
+    public virtual IQueryable<MasterRankingResult> GetMasterRanking(DateTime? inputPeriodStart,
+        DateTime? inputPeriodEnd) =>
+        FromExpression(() => GetMasterRanking((DateTime?)inputPeriodStart, (DateTime?)inputPeriodEnd));
+
+    public virtual IQueryable<PartsInfoResult> GetPartsLessMinCountInfo() =>
+        FromExpression(() => GetPartsLessMinCountInfo());
+
+    public virtual IQueryable<PartsInfoResult> GetPartsMoreMinCountInfo() =>
+        FromExpression(() => GetPartsMoreMinCountInfo());
+
+    // TODO: Rework entity configurations with attributes in []
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Stored procedure
+        modelBuilder
+            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetClientInfo))!)
+            .HasName("get_client_info");
+
+        modelBuilder
+            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetEmployeeInfo))!)
+            .HasName("get_employee_info");
+
+        modelBuilder
+            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetMasterRanking))!)
+            .HasName("get_master_ranking");
+        
+        modelBuilder
+            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetPartsLessMinCountInfo))!)
+            .HasName("get_parts_less_min_count_info");
+        
+        modelBuilder
+            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetPartsMoreMinCountInfo))!)
+            .HasName("get_parts_more_min_count_info");
+
+        modelBuilder.Entity(typeof(ClientInfoResult)).HasNoKey();
+        modelBuilder.Entity(typeof(EmployeeInfoResult)).HasNoKey();
+        modelBuilder.Entity(typeof(MasterRankingResult)).HasNoKey();
+        modelBuilder.Entity(typeof(PartsInfoResult)).HasNoKey();
+
+
+        // Stored entity configurations
+        modelBuilder.Entity<AllowedRepairTypesForEmployee>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("allowed_repair_types_for_employee_pkey");
+
+            entity.ToTable("allowed_repair_types_for_employee");
+
+            entity.HasIndex(e => new { e.RepairTypeForDeviceId, e.EmployeeId },
+                "allowed_repair_types_for_empl_repair_type_for_device_id_emp_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+            entity.Property(e => e.RepairTypeForDeviceId).HasColumnName("repair_type_for_device_id");
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.AllowedRepairTypesForEmployees)
+                .HasForeignKey(d => d.EmployeeId)
+                .HasConstraintName("allowed_repair_types_for_employee_employee_id_fkey");
+
+            entity.HasOne(d => d.RepairTypeForDevice).WithMany(p => p.AllowedRepairTypesForEmployees)
+                .HasForeignKey(d => d.RepairTypeForDeviceId)
+                .HasConstraintName("allowed_repair_types_for_employe_repair_type_for_device_id_fkey");
+        });
+
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("client_pkey");
+
+            entity.ToTable("client");
+
+            entity.HasIndex(e => e.DbUserId, "client_db_user_id_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.DbUserId).HasColumnName("db_user_id");
+            entity.Property(e => e.DiscountPercentage).HasColumnName("discount_percentage");
+
+            entity.HasOne(d => d.DbUser).WithOne(p => p.Client)
+                .HasForeignKey<Client>(d => d.DbUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("client_db_user_id_fkey");
+        });
+
+        modelBuilder.Entity<DbUser>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("db_user_pkey");
+
+            entity.ToTable("db_user");
+
+            entity.HasIndex(e => e.Login, "db_user_login_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(255)
+                .HasColumnName("first_name");
+            entity.Property(e => e.Login)
+                .HasMaxLength(255)
+                .HasColumnName("login");
+            entity.Property(e => e.PasswordHash)
+                .HasMaxLength(255)
+                .HasColumnName("password_hash");
+            entity.Property(e => e.SecondName)
+                .HasMaxLength(255)
+                .HasColumnName("second_name");
+            entity.Property(e => e.TelephoneNumber)
+                .HasMaxLength(255)
+                .HasColumnName("telephone_number");
+            entity.Property(e => e.Role)
+                .HasMaxLength(255)
+                .HasColumnName("role");
+        });
+
+        modelBuilder.Entity<Device>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("device_pkey");
+
+            entity.ToTable("device");
+
+            entity.HasIndex(e => e.Name, "device_name_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name).HasMaxLength(255).HasColumnName("name");
+            entity.Property(e => e.Type).HasMaxLength(255).HasColumnName("type");
+            entity.Property(e => e.Brand).HasMaxLength(255).HasColumnName("brand");
+            entity.Property(e => e.Series).HasMaxLength(255).HasColumnName("series");
+            entity.Property(e => e.Manufacturer).HasMaxLength(255).HasColumnName("manufacturer");
+        });
+
+        modelBuilder.Entity<Employee>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("employee_pkey");
+
+            entity.ToTable("employee");
+
+            entity.HasIndex(e => e.DbUserId, "employee_db_user_id_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.DbUserId).HasColumnName("db_user_id");
+
+            entity.HasOne(d => d.DbUser).WithOne(p => p.Employee)
+                .HasForeignKey<Employee>(d => d.DbUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("employee_db_user_id_fkey");
+        });
+
+        modelBuilder.Entity<PartForRepairType>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("part_for_repair_type_pkey");
+
+            entity.ToTable("part_for_repair_type");
+
+            entity.HasIndex(e => new { e.RepairTypeForDeviceId, e.RepairPartId },
+                "part_for_repair_type_repair_type_for_device_id_repair_part__key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.PartCount).HasColumnName("part_count");
+            entity.Property(e => e.RepairPartId).HasColumnName("repair_part_id");
+            entity.Property(e => e.RepairTypeForDeviceId).HasColumnName("repair_type_for_device_id");
+
+            entity.HasOne(d => d.RepairPart).WithMany(p => p.PartForRepairParts)
+                .HasForeignKey(d => d.RepairPartId)
+                .HasConstraintName("part_for_repair_type_repair_part_id_fkey");
+
+            entity.HasOne(d => d.RepairTypeForDevice).WithMany(p => p.PartForRepairParts)
+                .HasForeignKey(d => d.RepairTypeForDeviceId)
+                .HasConstraintName("part_for_repair_type_repair_type_for_device_id_fkey");
+        });
+
+        modelBuilder.Entity<RepairPart>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("repair_part_pkey");
+
+            entity.ToTable("repair_part");
+
+            entity.HasIndex(e => e.Name, "repair_part_name_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Cost).HasColumnName("cost");
+            entity.Property(e => e.CurrentCount).HasColumnName("current_count");
+            entity.Property(e => e.MinAllowedCount).HasColumnName("min_allowed_count");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.Specification)
+                .HasMaxLength(255)
+                .HasColumnName("specification");
+            entity.Property(e => e.Condition)
+                .HasMaxLength(255)
+                .HasColumnName("condition");
+        });
+
+        modelBuilder.Entity<RepairRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("repair_request_pkey");
+
+            entity.ToTable("repair_request");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ClientId).HasColumnName("client_id");
+            entity.Property(e => e.DeviceId).HasColumnName("device_id");
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+            entity.Property(e => e.SerialNumber)
+                .HasMaxLength(20)
+                .HasColumnName("serial_number");
+
+            entity.HasOne(d => d.Client).WithMany(p => p.RepairRequests)
+                .HasForeignKey(d => d.ClientId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("repair_request_client_id_fkey");
+
+            entity.HasOne(d => d.Device).WithMany(p => p.RepairRequests)
+                .HasForeignKey(d => d.DeviceId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("repair_request_device_id_fkey");
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.RepairRequests)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("repair_request_employee_id_fkey");
+        });
+
+        modelBuilder.Entity<RepairType>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("repair_type_pkey");
+
+            entity.ToTable("repair_type");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<RepairTypeForDevice>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("repair_type_for_device_pkey");
+
+            entity.ToTable("repair_type_for_device");
+
+            entity.HasIndex(e => new { e.RepairTypeId, e.DeviceId },
+                "repair_type_for_device_repair_type_id_device_id_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Cost).HasColumnName("cost");
+            entity.Property(e => e.DeviceId).HasColumnName("device_id");
+            entity.Property(e => e.RepairTypeId).HasColumnName("repair_type_id");
+            entity.Property(e => e.Time).HasColumnName("time");
+
+            entity.HasOne(d => d.Device).WithMany(p => p.RepairTypeForDevices)
+                .HasForeignKey(d => d.DeviceId)
+                .HasConstraintName("repair_type_for_device_device_id_fkey");
+
+            entity.HasOne(d => d.RepairType).WithMany(p => p.RepairTypeForDevices)
+                .HasForeignKey(d => d.RepairTypeId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("repair_type_for_device_repair_type_id_fkey");
+        });
+
+        modelBuilder.Entity<RepairTypesList>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("repair_types_list_pkey");
+
+            entity.ToTable("repair_types_list");
+
+            entity.HasIndex(e => new { e.RepairRequestId, e.RepairTypeForDeviceId },
+                "repair_types_list_repair_request_id_repair_type_for_device__key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.RepairRequestId).HasColumnName("repair_request_id");
+            entity.Property(e => e.RepairTypeForDeviceId).HasColumnName("repair_type_for_device_id");
+
+            entity.HasOne(d => d.RepairRequest).WithMany(p => p.RepairTypesLists)
+                .HasForeignKey(d => d.RepairRequestId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("repair_types_list_repair_request_id_fkey");
+
+            entity.HasOne(d => d.RepairTypeForDevice).WithMany(p => p.RepairTypesLists)
+                .HasForeignKey(d => d.RepairTypeForDeviceId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("repair_types_list_repair_type_for_device_id_fkey");
+        });
+
+        modelBuilder.Entity<RequestStatusHistory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("request_status_history_pkey");
+
+            entity.ToTable("request_status_history");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Date)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("date");
+            entity.Property(e => e.RepairRequestId).HasColumnName("repair_request_id");
+            entity.Property(e => e.RequestStatus).HasMaxLength(255).HasColumnName("status");
+
+            entity.HasOne(d => d.RepairRequest).WithMany(p => p.RequestStatusHistories)
+                .HasForeignKey(d => d.RepairRequestId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("request_status_history_repair_request_id_fkey");
+        });
+
+        base.OnModelCreating(modelBuilder);
+    }
+}

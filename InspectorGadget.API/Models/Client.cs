@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public sealed partial class Client
+public sealed class Client
 {
     public int Id { get; set; }
 

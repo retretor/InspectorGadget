@@ -20,7 +20,7 @@ public class AllowedRepairTypesForEmployeeController : ControllerBase
         _service = service;
     }
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.MASTER })]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AllowedRepairTypesForEmployee>>> GetAllowedRepairTypesForEmployees()
     {
@@ -34,7 +34,7 @@ public class AllowedRepairTypesForEmployeeController : ControllerBase
     }
 
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.MASTER })]
     [HttpGet("{id}")]
     public async Task<ActionResult<AllowedRepairTypesForEmployee>> GetAllowedRepairTypesForEmployee(int id)
     {

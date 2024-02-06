@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public sealed partial class PartForRepairPart
+public sealed class PartForRepairPart
 {
     public int Id { get; set; }
 

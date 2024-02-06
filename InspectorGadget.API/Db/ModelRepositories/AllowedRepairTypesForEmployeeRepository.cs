@@ -1,14 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using InspectorGadget.Models;
 
 namespace InspectorGadget.Db.ModelRepositories;
 
-public class AllowedRepairTypesForEmployeeRepository : IDbRepository
+public class AllowedRepairTypesForEmployeeRepository : BaseRepository<AllowedRepairTypesForEmployee>
 {
-    public AllowedRepairTypesForEmployeeRepository()
-    {
-        Context = new InspectorGadgetContext(new DbContextOptions<InspectorGadgetContext>());
-        Context.Database.EnsureCreated();
-    }
-
-    public InspectorGadgetContext Context { get; init; }
 }

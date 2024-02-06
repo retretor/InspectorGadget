@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public sealed partial class RequestStatusHistory
+public sealed class RequestStatusHistory
 {
     public int Id { get; set; }
 
@@ -8,7 +8,7 @@ public sealed partial class RequestStatusHistory
 
     public int RepairRequestId { get; set; }
 
-    public RequestStatus RequestStatus { get; set; }
+    public string RequestStatus { get; set; } = null!;
 
     public RepairRequest RepairRequest { get; set; } = null!;
 }

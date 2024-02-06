@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public sealed partial class Employee
+public sealed class Employee
 {
     public int Id { get; set; }
 

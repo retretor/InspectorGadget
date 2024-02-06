@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public sealed partial class RepairTypeForDevice
+public sealed class RepairTypeForDevice
 {
     public int Id { get; set; }
 
@@ -12,7 +12,8 @@ public sealed partial class RepairTypeForDevice
 
     public int DeviceId { get; set; }
 
-    public ICollection<AllowedRepairTypesForEmployee> AllowedRepairTypesForEmployees { get; set; } = new List<AllowedRepairTypesForEmployee>();
+    public ICollection<AllowedRepairTypesForEmployee> AllowedRepairTypesForEmployees { get; set; } =
+        new List<AllowedRepairTypesForEmployee>();
 
     public Device Device { get; set; } = null!;
 

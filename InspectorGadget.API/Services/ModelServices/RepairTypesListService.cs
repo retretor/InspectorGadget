@@ -4,7 +4,9 @@ using InspectorGadget.Models;
 
 namespace InspectorGadget.Services.ModelServices;
 
-public class RepairTypesListService : IEntityService<RepairTypesList, RepairTypesListDto>
+public class RepairTypesListService : EntityService<RepairTypesList, RepairTypesListDto>
 {
-    public IDbRepository Repository { get; } = new RepairTypesListRepository();
+    public RepairTypesListService(RepairTypesListRepository repository) : base(repository)
+    {
+    }
 }

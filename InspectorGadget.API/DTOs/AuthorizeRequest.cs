@@ -1,6 +1,4 @@
-﻿using InspectorGadget.Models;
-
-namespace InspectorGadget.DTOs;
+﻿namespace InspectorGadget.DTOs;
 
 public class AuthorizeRequest
 {

@@ -1,6 +1,6 @@
 ﻿namespace InspectorGadget.Models;
 
-public sealed partial class AllowedRepairTypesForEmployee
+public sealed class AllowedRepairTypesForEmployee
 {
     public int Id { get; set; }
 

@@ -53,12 +53,6 @@ public partial class InspectorGadgetContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder
-            .HasPostgresEnum("user_role", new[] { "CLIENT", "ADMIN", "RECEPTIONIST", "MASTER" })
-            .HasPostgresEnum("repair_part_condition", new[] { "NEW", "USED" })
-            .HasPostgresEnum("request_status",
-                new[] { "NEW", "IN_PROCESSING", "REJECTED", "PAID", "RETURNED", "ACCEPTED", "COMPLETED" });
-
         modelBuilder.Entity<AllowedRepairTypesForEmployee>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("allowed_repair_types_for_employee_pkey");
@@ -123,7 +117,9 @@ public partial class InspectorGadgetContext : DbContext
             entity.Property(e => e.TelephoneNumber)
                 .HasMaxLength(255)
                 .HasColumnName("telephone_number");
-            entity.Property(e => e.Role).HasColumnName("role").HasConversion<string>();
+            entity.Property(e => e.Role)
+                .HasMaxLength(255)
+                .HasColumnName("role");
         });
 
         modelBuilder.Entity<Device>(entity =>
@@ -135,9 +131,11 @@ public partial class InspectorGadgetContext : DbContext
             entity.HasIndex(e => e.Name, "device_name_key").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Name)
-                .HasMaxLength(255)
-                .HasColumnName("name");
+            entity.Property(e => e.Name).HasMaxLength(255).HasColumnName("name");
+            entity.Property(e => e.Type).HasMaxLength(255).HasColumnName("type");
+            entity.Property(e => e.Brand).HasMaxLength(255).HasColumnName("brand");
+            entity.Property(e => e.Series).HasMaxLength(255).HasColumnName("series");
+            entity.Property(e => e.Manufacturer).HasMaxLength(255).HasColumnName("manufacturer");
         });
 
         modelBuilder.Entity<Employee>(entity =>
@@ -199,14 +197,8 @@ public partial class InspectorGadgetContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("specification");
             entity.Property(e => e.Condition)
-                .HasColumnName("condition")
-                .HasColumnType("repair_part_condition");
-            
-            // entity.Property(e => e.Condition)
-            //     .HasColumnName("condition")
-            //     .HasConversion(v => v.ToString(), 
-            //         v => (RepairPartCondition)Enum.Parse(typeof(RepairPartCondition), v))
-            //     .HasColumnType("repair_part_condition");
+                .HasMaxLength(255)
+                .HasColumnName("condition");
         });
 
         modelBuilder.Entity<RepairRequest>(entity =>
@@ -312,7 +304,7 @@ public partial class InspectorGadgetContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("date");
             entity.Property(e => e.RepairRequestId).HasColumnName("repair_request_id");
-            entity.Property(e => e.RequestStatus).HasColumnName("status").HasConversion<string>();
+            entity.Property(e => e.RequestStatus).HasMaxLength(255).HasColumnName("status");
 
             entity.HasOne(d => d.RepairRequest).WithMany(p => p.RequestStatusHistories)
                 .HasForeignKey(d => d.RepairRequestId)

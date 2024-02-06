@@ -1,14 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using InspectorGadget.Models;
 
 namespace InspectorGadget.Db.ModelRepositories;
 
-public class PartForRepairPartRepository : IDbRepository
+public class PartForRepairPartRepository : BaseRepository<PartForRepairPart>
 {
-    public PartForRepairPartRepository()
-    {
-        Context = new InspectorGadgetContext(new DbContextOptions<InspectorGadgetContext>());
-        Context.Database.EnsureCreated();
-    }
-
-    public InspectorGadgetContext Context { get; init; }
 }

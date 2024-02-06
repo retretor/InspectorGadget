@@ -4,13 +4,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InspectorGadget.Db.ModelRepositories;
 
-public class RepairPartRepository : IDbRepository
+public class RepairPartRepository : BaseRepository<RepairPart>
 {
-    public RepairPartRepository()
+    public override async Task<RepairPart?> CreateAsync(object inDto) 
     {
-        Context = new InspectorGadgetContext(new DbContextOptions<InspectorGadgetContext>());
-        Context.Database.EnsureCreated();
-    }
+        var dto = (RepairPartDto)inDto;
+        var entities = await Context.RepairParts.ToListAsync();
+        if (entities.Any(e => e.Name == dto.Name))
+        {
+            Console.WriteLine($"RepairPart already exists: {dto.Name}");
+            return null;
+        }
 
-    public InspectorGadgetContext Context { get; init; }
+        var entity = new RepairPart
+        {
+            Condition = dto.Condition,
+            Cost = dto.Cost,
+            CurrentCount = dto.CurrentCount,
+            MinAllowedCount = dto.MinAllowedCount,
+            Name = dto.Name,
+            Specification = dto.Specification
+        };
+        Context.RepairParts.Add(entity);
+        await Context.SaveChangesAsync();
+        return entity;
+    }
 }

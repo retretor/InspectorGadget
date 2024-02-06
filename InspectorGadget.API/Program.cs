@@ -1,6 +1,6 @@
 using System.Text;
 using InspectorGadget.Db;
-using InspectorGadget.Models;
+using InspectorGadget.Db.ModelRepositories;
 using InspectorGadget.Services.AuthServices;
 using InspectorGadget.Services.ModelServices;
 using InspectorGadget.Swagger;
@@ -38,6 +38,21 @@ builder.Services.AddAuthentication(x =>
 builder.Services.AddControllers();
 
 // Scoped
+// Repositories
+builder.Services.AddScoped<AllowedRepairTypesForEmployeeRepository>();
+builder.Services.AddScoped<ClientRepository>();
+builder.Services.AddScoped<DeviceRepository>();
+builder.Services.AddScoped<DbUserRepository>();
+builder.Services.AddScoped<EmployeeRepository>();
+builder.Services.AddScoped<PartForRepairPartRepository>();
+builder.Services.AddScoped<RepairPartRepository>();
+builder.Services.AddScoped<RepairRequestRepository>();
+builder.Services.AddScoped<RepairTypeRepository>();
+builder.Services.AddScoped<RepairTypeForDeviceRepository>();
+builder.Services.AddScoped<RepairTypesListRepository>();
+builder.Services.AddScoped<RequestStatusHistoryRepository>();
+
+// Services
 builder.Services.AddScoped<AllowedRepairTypesForEmployeeService>();
 builder.Services.AddScoped<ClientService>();
 builder.Services.AddScoped<DeviceService>();
@@ -52,7 +67,7 @@ builder.Services.AddScoped<RequestStatusHistoryService>();
 
 
 builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<DbUserService>();
 builder.Services.AddScoped<AuthorizeService>();
 
 
@@ -62,21 +77,26 @@ builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwa
 
 
 // Add db
-// Создание объекта NpgsqlDataSourceBuilder
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
-dataSourceBuilder.UseNodaTime()
-    .MapEnum<RepairPartCondition>()
-    .MapEnum<RequestStatus>()
-    .MapEnum<UserRole>();
-var dataSource = dataSourceBuilder.Build(); // Построение источника данных
-
-// Настройка контекста для использования источника данных
+dataSourceBuilder.UseNodaTime();
+var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<InspectorGadgetContext>(options => { options.UseNpgsql(dataSource); });
 
-// builder.Services.AddDbContext<InspectorGadgetContext>(options =>
-// {
-//     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-// });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        corsPolicyBuilder =>
+        {
+            corsPolicyBuilder
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+            corsPolicyBuilder
+                .WithOrigins("https://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 var app = builder.Build();
 
@@ -88,7 +108,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowSpecificOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+
+// TODO:
+/*
+Изменить доступ ролей к некоторым контроллерам
+
+*/

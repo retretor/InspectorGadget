@@ -13,14 +13,14 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class RepairTypesListController : ControllerBase
 {
-    private readonly IEntityService<RepairTypesList, RepairTypesListDto> _service;
+    private readonly RepairTypesListService _service;
 
     public RepairTypesListController(RepairTypesListService service)
     {
         _service = service;
     }
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.CLIENT, UserRole.RECEPTIONIST})]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RepairTypesList>>> GetRepairTypesLists()
     {
@@ -33,7 +33,7 @@ public class RepairTypesListController : ControllerBase
         return Ok(repairTypesLists);
     }
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.CLIENT, UserRole.RECEPTIONIST}, true)]
     [HttpGet("{id}")]
     public async Task<ActionResult<RepairTypesList>> GetRepairTypesList(int id)
     {
@@ -47,7 +47,7 @@ public class RepairTypesListController : ControllerBase
         return Ok(repairTypesList);
     }
 
-    [RequiresClaim(ClaimTypes.Role, UserRole.ADMIN)]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER})]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutRepairTypesList(int id, RepairTypesListDto repairTypesListDto)
     {
@@ -60,7 +60,7 @@ public class RepairTypesListController : ControllerBase
         return NoContent();
     }
 
-    [RequiresClaim(ClaimTypes.Role, UserRole.ADMIN)]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER})]
     [HttpPost]
     public async Task<ActionResult<RepairTypesList>> PostRepairTypesList(RepairTypesListDto repairTypesListDto)
     {
@@ -73,7 +73,7 @@ public class RepairTypesListController : ControllerBase
         return CreatedAtAction("GetRepairTypesList", new { id = createdRepairTypesList.Id }, createdRepairTypesList);
     }
 
-    [RequiresClaim(ClaimTypes.Role, UserRole.ADMIN)]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER})]
     [HttpDelete("{id}")]
     public async Task<ActionResult<RepairTypesList>> DeleteRepairTypesList(int id)
     {

@@ -13,7 +13,7 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class EmployeeController : ControllerBase
 {
-    private readonly IEntityService<Employee, EmployeeDto> _service;
+    private readonly EmployeeService _service;
 
     public EmployeeController(EmployeeService service)
     {
@@ -46,23 +46,10 @@ public class EmployeeController : ControllerBase
 
         return Ok(employee);
     }
-
-    [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN })]
-    [HttpPost]
-    public async Task<ActionResult<Employee>> PostEmployee(EmployeeDto employeeDto)
-    {
-        var employee = await _service.Create(employeeDto);
-        if (employee == null)
-        {
-            return BadRequest();
-        }
-
-        return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
-    }
     
     [RequiresClaim(ClaimTypes.Role, new[] { UserRole.ADMIN })]
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutEmployee(int id, EmployeeDto employeeDto)
+    public async Task<IActionResult> PutEmployee(int id, UpdateEmployeeDto employeeDto)
     {
         var updatedEmployee = await _service.Update(id, employeeDto);
         if (updatedEmployee == null)

@@ -1,8 +1,6 @@
-﻿using InspectorGadget.DTOs;
+﻿namespace InspectorGadget.Models;
 
-namespace InspectorGadget.Models;
-
-public sealed partial class RepairPart
+public sealed class RepairPart
 {
     public int Id { get; set; }
 
@@ -15,8 +13,8 @@ public sealed partial class RepairPart
     public int MinAllowedCount { get; set; }
 
     public int Cost { get; set; }
-    
-    public RepairPartCondition Condition { get; set; }
+
+    public string Condition { get; set; } = null!;
 
     public ICollection<PartForRepairPart> PartForRepairParts { get; set; } = new List<PartForRepairPart>();
 }

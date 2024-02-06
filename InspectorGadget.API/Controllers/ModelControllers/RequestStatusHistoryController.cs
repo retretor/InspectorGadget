@@ -13,14 +13,14 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class RequestStatusHistoryController : ControllerBase
 {
-    private readonly IEntityService<RequestStatusHistory, RequestStatusHistoryDto> _service;
+    private readonly RequestStatusHistoryService _service;
 
     public RequestStatusHistoryController(RequestStatusHistoryService service)
     {
         _service = service;
     }
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER, UserRole.RECEPTIONIST})]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RequestStatusHistory>>> GetRequestStatusHistories()
     {
@@ -33,7 +33,7 @@ public class RequestStatusHistoryController : ControllerBase
         return Ok(requestStatusHistories);
     }
 
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER, UserRole.RECEPTIONIST}, true)]
     [HttpGet("{id}")]
     public async Task<ActionResult<RequestStatusHistory>> GetRequestStatusHistory(int id)
     {
@@ -47,7 +47,7 @@ public class RequestStatusHistoryController : ControllerBase
         return Ok(requestStatusHistory);
     }
 
-    [RequiresClaim(ClaimTypes.Role, UserRole.ADMIN)]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER, UserRole.RECEPTIONIST})]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutRequestStatusHistory(int id, RequestStatusHistoryDto requestStatusHistoryDto)
     {
@@ -60,7 +60,7 @@ public class RequestStatusHistoryController : ControllerBase
         return NoContent();
     }
 
-    [RequiresClaim(ClaimTypes.Role, UserRole.ADMIN)]
+    [RequiresClaim(ClaimTypes.Role, new[] {UserRole.ADMIN, UserRole.MASTER, UserRole.RECEPTIONIST, UserRole.CLIENT})]
     [HttpPost]
     public async Task<ActionResult<RequestStatusHistory>> PostRequestStatusHistory(
         RequestStatusHistoryDto requestStatusHistoryDto)

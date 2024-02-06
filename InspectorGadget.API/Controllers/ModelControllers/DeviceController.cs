@@ -13,7 +13,7 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class DeviceController : ControllerBase
 {
-    private readonly IEntityService<Device, DeviceDto> _service;
+    private readonly DeviceService _service;
 
     public DeviceController(DeviceService service)
     {
@@ -51,7 +51,7 @@ public class DeviceController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutDevice(int id, DeviceDto deviceDto)
     {
-        var updatedDevice = await _service.Update(id, deviceDto);
+        var updatedDevice = await _service.UpdateDevice(id, deviceDto);
         if (updatedDevice == null)
         {
             return NotFound();
@@ -64,7 +64,7 @@ public class DeviceController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Device>> PostDevice(DeviceDto device)
     {
-        var createdDevice = await _service.Create(device);
+        var createdDevice = await _service.CreateDevice(device);
         if (createdDevice == null)
         {
             return BadRequest();

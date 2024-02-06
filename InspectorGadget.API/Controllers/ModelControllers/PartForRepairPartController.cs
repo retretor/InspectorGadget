@@ -13,7 +13,7 @@ namespace InspectorGadget.Controllers.ModelControllers;
 [ApiController]
 public class PartForRepairPartController : ControllerBase
 {
-    private readonly IEntityService<PartForRepairPart, PartForRepairPartDto> _service;
+    private readonly PartForRepairPartService _service;
 
     public PartForRepairPartController(PartForRepairPartService service)
     {

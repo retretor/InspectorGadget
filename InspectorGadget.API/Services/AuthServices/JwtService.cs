@@ -25,9 +25,12 @@ public class JwtService
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, user.Login),
-            new(ClaimTypes.Role, user.Role.ToString()),
-            new(ClaimTypes.NameIdentifier, user.Id.ToString())
+            new(ClaimTypes.NameIdentifier, user.Login),
+            new(ClaimTypes.Role, user.Role),
+            new(ClaimTypes.Sid, user.Id.ToString()),
+            new(ClaimTypes.Name, user.FirstName),
+            new(ClaimTypes.Surname, user.SecondName),
+            new(ClaimTypes.MobilePhone, user.TelephoneNumber)
         };
         
         var jwt = new JwtSecurityToken(
@@ -41,5 +44,30 @@ public class JwtService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(jwt);
+    }
+    
+    public bool IsValidToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        try
+        {
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret)),
+                ValidateIssuer = true,
+                ValidIssuer = _issuer,
+                ValidateAudience = true,
+                ValidAudience = _audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            }, out _);
+        }
+        catch
+        {
+            return false;
+        }
+
+        return true;
     }
 }

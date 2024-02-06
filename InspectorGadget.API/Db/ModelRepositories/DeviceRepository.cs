@@ -1,14 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using InspectorGadget.Models;
 
 namespace InspectorGadget.Db.ModelRepositories;
 
-public class DeviceRepository : IDbRepository
+public class DeviceRepository : BaseRepository<Device>
 {
-    public DeviceRepository()
-    {
-        Context = new InspectorGadgetContext(new DbContextOptions<InspectorGadgetContext>());
-        Context.Database.EnsureCreated();
-    }
-
-    public InspectorGadgetContext Context { get; init; }
 }
