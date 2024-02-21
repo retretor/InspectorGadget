@@ -1,59 +1,61 @@
-﻿using Application.Common.Interfaces;
-using AutoMapper;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
+using Application.Common.Models;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Actions.DbUser;
 
-public class GetDbUserQuery : IRequest<Domain.Entities.Basic.DbUser>
+public class GetDbUserQuery : IRequest<(Result, Domain.Entities.Basic.DbUser?)>
 {
     public int Id { get; init; }
-
-    public GetDbUserQuery(int id)
-    {
-        Id = id;
-    }
+    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class GetAllDbUserQuery : IRequest<IEnumerable<Domain.Entities.Basic.DbUser>>
+public class GetAllDbUsersQuery : IRequest<(Result, IEnumerable<Domain.Entities.Basic.DbUser>?)>
 {
+    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class GetDbUserHandler : IRequestHandler<GetDbUserQuery, Domain.Entities.Basic.DbUser>
+public class GetDbUserHandler : IRequestHandler<GetDbUserQuery, (Result, Domain.Entities.Basic.DbUser?)>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetDbUserHandler(IApplicationDbContext context, IMapper mapper)
+    public GetDbUserHandler()
     {
-        _context = context;
-        _mapper = mapper;
     }
 
-    public async Task<Domain.Entities.Basic.DbUser> Handle(GetDbUserQuery request, CancellationToken cancellationToken)
-    {
-        var entity = await _context.DbUsers.FindAsync(request.Id);
-        return _mapper.Map<Domain.Entities.Basic.DbUser>(entity);
-    }
-}
-
-public class GetAllDbUserHandler : IRequestHandler<GetAllDbUserQuery, IEnumerable<Domain.Entities.Basic.DbUser>>
-{
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetAllDbUserHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
-    public async Task<IEnumerable<Domain.Entities.Basic.DbUser>> Handle(GetAllDbUserQuery request,
+    public async Task<(Result, Domain.Entities.Basic.DbUser?)> Handle(GetDbUserQuery request,
         CancellationToken cancellationToken)
     {
-        var entities = await _context.DbUsers.ToListAsync(cancellationToken);
-        return _mapper.Map<IEnumerable<Domain.Entities.Basic.DbUser>>(entities);
+        if (request.DbContext == null)
+        {
+            return (Result.Failure(new InvalidDbContextException()), null);
+        }
+
+        var entity = await request.DbContext.DbUsers.FindAsync(request.Id);
+        return entity == null
+            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.DbUser), request.Id)), null)
+            : (Result.Success(), entity);
+    }
+}
+
+public class
+    GetAllDbUsersHandler : IRequestHandler<GetAllDbUsersQuery, (Result, IEnumerable<Domain.Entities.Basic.DbUser>?)>
+{
+    public GetAllDbUsersHandler()
+    {
+    }
+
+    public async Task<(Result, IEnumerable<Domain.Entities.Basic.DbUser>?)> Handle(GetAllDbUsersQuery request,
+        CancellationToken cancellationToken)
+    {
+        if (request.DbContext == null)
+        {
+            return (Result.Failure(new InvalidDbContextException()), null);
+        }
+
+        var entities = await request.DbContext.DbUsers.ToListAsync(cancellationToken);
+        return (Result.Success(), entities);
     }
 }
 

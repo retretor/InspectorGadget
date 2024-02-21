@@ -1,14 +1,17 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using Application.Actions.Authorization;
+using Application.Actions.Authorization.AuthorizeByLogin;
+using Application.Actions.Authorization.AuthorizeByToken;
+using Application.Actions.Authorization.ChangePassword;
+using Application.Actions.Authorization.RemindLogin;
 using Application.Common.Authorization;
 using Application.Common.Enums;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Domain.Entities.Basic;
 
 namespace Infrastructure.Authorization;
 
-// TODO: ADD Authorization
 public class AuthorizationService : IAuthorizationService
 {
     private readonly IIdentityService _identityService;
@@ -54,10 +57,42 @@ public class AuthorizationService : IAuthorizationService
             return (Result.Failure(new List<ResultError> { new(ResultErrorEnum.UserNotFound) }), null);
         }
 
-        var dbUser = new DbUser(user.Id, user.FirstName, user.SecondName, user.TelephoneNumber, user.Login,
-            user.PasswordHash, user.Role);
+        return (Result.Success(), GenerateResponse(user, validTo));
+    }
 
-        return (Result.Success(), GenerateResponse(dbUser, validTo));
+    public async Task<(Result, AuthorizeResponse?)> ChangePassword(ChangePasswordQuery request)
+    {
+        var (result, dbUser) = await _identityService.AuthenticateUser(request.Login, request.OldPasswordHash);
+
+        if (result.Succeeded == false)
+        {
+            return (result, null);
+        }
+
+        (result, dbUser) = await _identityService.ChangePassword(dbUser, request.NewPasswordHash);
+
+        if (result.Succeeded == false)
+        {
+            return (result, null);
+        }
+
+        var response = GenerateResponse(dbUser);
+
+        return (result, response);
+    }
+
+    public async Task<(Result, string?)> RemindLogin(RemindLoginQuery request)
+    {
+        var (result, dbUser) = await _identityService.GetUserByTelephone(request.TelephoneNumber, request.SecretKey);
+
+        if (result.Succeeded == false)
+        {
+            return (result, null);
+        }
+
+        return dbUser == null
+            ? (Result.Failure(new NotFoundException(nameof(DbUser), request.TelephoneNumber)), null)
+            : (result, dbUser.Login);
     }
 
     private AuthorizeResponse? GenerateResponse(DbUser? dbUser, DateTime? validTo = null)

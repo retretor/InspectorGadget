@@ -35,9 +35,6 @@ public class RequiresClaimAttribute : Attribute, IAuthorizationFilter
         var isClaimed = false;
         foreach (var claimValue in claimValues)
         {
-            // TODO: Remove this debug code
-            Console.WriteLine("ClaimValue: " + claimValue);
-            Console.WriteLine("UserValue: " + user.FindFirst(_claimName)?.Value);
             isClaimed = user.HasClaim(_claimName, claimValue);
             if (isClaimed) break;
         }

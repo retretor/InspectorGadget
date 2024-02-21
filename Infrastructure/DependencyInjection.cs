@@ -21,11 +21,14 @@ public static class DependencyInjection
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
         dataSourceBuilder.UseNodaTime();
         var dataSource = dataSourceBuilder.Build();
-
         services.AddDbContext<InspectorGadgetDbContext>(options => { options.UseNpgsql(dataSource); });
-        
+
+        // var connectionString = configuration.GetConnectionString("DefaultConnection");
+        // services.AddDbContext<InspectorGadgetDbContext>(options => { options.UseNpgsql(connectionString); });
+
         services.AddScoped<IApplicationDbContext, InspectorGadgetDbContext>();
-        
+        services.AddScoped<IAppDbContextProvider, AppDbContextProvider>();
+
         // Add authentication
         services.AddAuthentication(x =>
         {
@@ -47,7 +50,7 @@ public static class DependencyInjection
                 ValidateIssuerSigningKey = true
             };
         });
-        
+
         // Add services
         services.AddScoped<JwtService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();

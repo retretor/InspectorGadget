@@ -1,42 +1,69 @@
-﻿using Application.Common.Interfaces;
-using AutoMapper;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
+using Application.Common.Models;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Actions.RepairTypesList;
 
-public class GetRepairTypesListQuery : IRequest<Domain.Entities.Basic.RepairTypesList>
+public class GetRepairTypesListQuery : IRequest<(Result, Domain.Entities.Basic.RepairTypesList?)>
 {
     public int Id { get; init; }
-    public int RepairTypeForDeviceId { get; init; }
-    public int RepairRequestId { get; init; }
+    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class GetRepairTypesListQueryHandler : IRequestHandler<GetRepairTypesListQuery, Domain.Entities.Basic.RepairTypesList>
+public class GetAllRepairTypesListsQuery : IRequest<(Result, IEnumerable<Domain.Entities.Basic.RepairTypesList>?)>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
+    public IApplicationDbContext? DbContext { get; set; }
+}
 
-    public GetRepairTypesListQueryHandler(IApplicationDbContext context, IMapper mapper)
+public class
+    GetRepairTypesListHandler : IRequestHandler<GetRepairTypesListQuery, (Result, Domain.Entities.Basic.RepairTypesList?
+    )>
+{
+    public GetRepairTypesListHandler()
     {
-        _context = context;
-        _mapper = mapper;
     }
 
-    public async Task<Domain.Entities.Basic.RepairTypesList> Handle(GetRepairTypesListQuery request,
+    public async Task<(Result, Domain.Entities.Basic.RepairTypesList?)> Handle(GetRepairTypesListQuery request,
         CancellationToken cancellationToken)
     {
-        var entity = await _context.RepairTypesLists.FindAsync(request.Id);
-        return _mapper.Map<Domain.Entities.Basic.RepairTypesList>(entity);
+        if (request.DbContext == null)
+        {
+            return (Result.Failure(new InvalidDbContextException()), null);
+        }
+
+        var entity = await request.DbContext.RepairTypesLists.FindAsync(request.Id);
+        return entity == null
+            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairTypesList), request.Id)), null)
+            : (Result.Success(), entity);
     }
 }
 
-public class GetRepairTypesListQueryValidator : AbstractValidator<GetRepairTypesListQuery>
+public class GetAllRepairTypesListsHandler : IRequestHandler<GetAllRepairTypesListsQuery,
+    (Result, IEnumerable<Domain.Entities.Basic.RepairTypesList>?)>
 {
-    public GetRepairTypesListQueryValidator()
+    public GetAllRepairTypesListsHandler()
     {
-        RuleFor(x => x.Id).NotEmpty();
-        RuleFor(x => x.RepairTypeForDeviceId).NotEmpty();
-        RuleFor(x => x.RepairRequestId).NotEmpty();
+    }
+
+    public async Task<(Result, IEnumerable<Domain.Entities.Basic.RepairTypesList>?)> Handle(GetAllRepairTypesListsQuery request,
+        CancellationToken cancellationToken)
+    {
+        if (request.DbContext == null)
+        {
+            return (Result.Failure(new InvalidDbContextException()), null);
+        }
+        var entities = await request.DbContext.RepairTypesLists.ToListAsync(cancellationToken);
+        return (Result.Success(), entities);
+    }
+}
+
+public class GetRepairTypesListValidator : AbstractValidator<GetRepairTypesListQuery>
+{
+    public GetRepairTypesListValidator()
+    {
+        RuleFor(v => v.Id).NotEmpty().GreaterThanOrEqualTo(0);
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Web;
 using Web.Swagger;
@@ -16,12 +17,15 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
 
 // Add swagger
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Inspector Gadgets API", Version = "v1" }); });
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
 // Add cors
 builder.Services.AddCors(options =>
 {
+    options.AddPolicy("AllowAll", corsPolicyBuilder =>
+        corsPolicyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
     options.AddPolicy("AllowSpecificOrigin",
         corsPolicyBuilder =>
         {
@@ -43,7 +47,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Inspector Gadgets API V1"); });
 }
 
 app.UseHttpsRedirection();

@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InspectorGadget.API", "InspectorGadget.API\InspectorGadget.API.csproj", "{1B268868-A9E2-4D76-8190-1FE265E63505}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{271CB784-27AA-4BA5-99D0-CB37FCACE08E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{46920B22-F29A-4505-B745-045FB44ACB32}"
@@ -12,16 +10,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{79D9E8BC-81D3-4603-9B39-24C88379BCD3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DBCBCFBC-6D4E-46AD-B2AB-F690F5C20EB5}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+		Dockerfile = Dockerfile
+		.dockerignore = .dockerignore
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1B268868-A9E2-4D76-8190-1FE265E63505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1B268868-A9E2-4D76-8190-1FE265E63505}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1B268868-A9E2-4D76-8190-1FE265E63505}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1B268868-A9E2-4D76-8190-1FE265E63505}.Release|Any CPU.Build.0 = Release|Any CPU
 		{46920B22-F29A-4505-B745-045FB44ACB32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{46920B22-F29A-4505-B745-045FB44ACB32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46920B22-F29A-4505-B745-045FB44ACB32}.Release|Any CPU.ActiveCfg = Release|Any CPU

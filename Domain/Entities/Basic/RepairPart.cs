@@ -10,5 +10,5 @@ public class RepairPart : BaseEntity
     public int MinAllowedCount { get; set; }
     public int Cost { get; set; }
     public string Condition { get; set; } = null!;
-    public ICollection<PartForRepairType> PartForRepairParts { get; set; } = new List<PartForRepairType>();
+    public virtual ICollection<PartForRepairType> PartForRepairTypes { get; set; } = new List<PartForRepairType>();
 }

@@ -27,11 +27,9 @@ public class JwtService
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Login),
-            new(ClaimTypes.Role, user.Role.ToString()),
+            new(ClaimTypes.Role, user.Role),
             new(ClaimTypes.Sid, user.Id.ToString()),
-            new(ClaimTypes.Name, user.FirstName),
-            new(ClaimTypes.Surname, user.SecondName),
-            new(ClaimTypes.MobilePhone, user.TelephoneNumber)
+            new(ClaimTypes.UserData, user.SecretKey)
         };
 
         var jwt = new JwtSecurityToken(

@@ -12,4 +12,10 @@ public class ResultError
         Code = code;
         Message = code.ToString();
     }
+
+    public ResultError(string message)
+    {
+        Code = ResultErrorEnum.Unknown;
+        Message = message;
+    }
 }

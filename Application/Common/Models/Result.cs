@@ -21,4 +21,9 @@ public class Result
     {
         return new Result(false, errors);
     }
+
+    public static Result Failure(Exception error)
+    {
+        return new Result(false, new[] { new ResultError(error.Message) });
+    }
 }

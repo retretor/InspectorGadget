@@ -1,58 +1,66 @@
-﻿using Application.Common.Interfaces;
-using AutoMapper;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
+using Application.Common.Models;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Actions.AllowedRepairTypesForEmployee;
 
-public class GetAllowedRepairTypesForEmployeeQuery : IRequest<Domain.Entities.Basic.AllowedRepairTypesForEmployee>
+public class
+    GetAllowedRepairTypesForEmployeeQuery : IRequest<(Result, Domain.Entities.Basic.AllowedRepairTypesForEmployee?)>
 {
     public int Id { get; init; }
-
-    public GetAllowedRepairTypesForEmployeeQuery(int id) => Id = id;
+    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class GetAllAllowedRepairTypesForEmployeeQuery : IRequest<IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>>
+public class
+    GetAllAllowedRepairTypesForEmployeeQuery : IRequest<(Result,
+    IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>?)>
 {
+    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class GetAllowedRepairTypesForEmployeeHandler : IRequestHandler<GetAllowedRepairTypesForEmployeeQuery, Domain.Entities.Basic.AllowedRepairTypesForEmployee>
+public class GetAllowedRepairTypesForEmployeeHandler : IRequestHandler<GetAllowedRepairTypesForEmployeeQuery, (Result,
+    Domain.Entities.Basic.AllowedRepairTypesForEmployee?)>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetAllowedRepairTypesForEmployeeHandler(IApplicationDbContext context, IMapper mapper)
+    public GetAllowedRepairTypesForEmployeeHandler()
     {
-        _context = context;
-        _mapper = mapper;
     }
 
-    public async Task<Domain.Entities.Basic.AllowedRepairTypesForEmployee> Handle(
+    public async Task<(Result, Domain.Entities.Basic.AllowedRepairTypesForEmployee?)> Handle(
         GetAllowedRepairTypesForEmployeeQuery request, CancellationToken cancellationToken)
     {
-        var entity = await _context.AllowedRepairTypesForEmployees.FindAsync(request.Id);
-        return _mapper.Map<Domain.Entities.Basic.AllowedRepairTypesForEmployee>(entity);
+        if (request.DbContext == null)
+        {
+            return (Result.Failure(new InvalidDbContextException()), null);
+        }
+
+        var entity = await request.DbContext.AllowedRepairTypesForEmployees.FindAsync(request.Id);
+        return entity == null
+            ? (Result.Failure(new NotFoundException(nameof(AllowedRepairTypesForEmployee), request.Id)), null)
+            : (Result.Success(), entity);
     }
 }
 
 public class GetAllAllowedRepairTypesForEmployeeHandler : IRequestHandler<GetAllAllowedRepairTypesForEmployeeQuery,
-    IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>>
+    (Result, IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>?)>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetAllAllowedRepairTypesForEmployeeHandler(IApplicationDbContext context, IMapper mapper)
+    public GetAllAllowedRepairTypesForEmployeeHandler()
     {
-        _context = context;
-        _mapper = mapper;
     }
 
-    public async Task<IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>> Handle(GetAllAllowedRepairTypesForEmployeeQuery request,
+    public async Task<(Result, IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>?)> Handle(
+        GetAllAllowedRepairTypesForEmployeeQuery request,
         CancellationToken cancellationToken)
     {
-        var entities = await _context.AllowedRepairTypesForEmployees.ToListAsync(cancellationToken);
-        return _mapper.Map<IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>>(entities);
+        if (request.DbContext == null)
+        {
+            return (Result.Failure(new InvalidDbContextException()), null);
+        }
+
+        var entities = await request.DbContext.AllowedRepairTypesForEmployees.ToListAsync(cancellationToken);
+        return (Result.Success(), entities);
     }
 }
 

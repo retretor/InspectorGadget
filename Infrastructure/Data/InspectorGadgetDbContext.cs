@@ -16,40 +16,52 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
     {
     }
 
+    public InspectorGadgetDbContext(string connectionString) : base(BuildDbContextOptions(connectionString))
+    {
+    }
+
+    private static DbContextOptions<InspectorGadgetDbContext> BuildDbContextOptions(string connectionString)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<InspectorGadgetDbContext>();
+        optionsBuilder.UseNpgsql(connectionString);
+        return optionsBuilder.Options;
+    }
+
     public virtual DbSet<AllowedRepairTypesForEmployee> AllowedRepairTypesForEmployees { get; set; } = null!;
-
     public virtual DbSet<Client> Clients { get; set; } = null!;
-
     public virtual DbSet<DbUser> DbUsers { get; set; } = null!;
-
     public virtual DbSet<Device> Devices { get; set; } = null!;
-
     public virtual DbSet<Employee> Employees { get; set; } = null!;
-
     public virtual DbSet<PartForRepairType> PartForRepairTypes { get; set; } = null!;
-
     public virtual DbSet<RepairPart> RepairParts { get; set; } = null!;
-
     public virtual DbSet<RepairRequest> RepairRequests { get; set; } = null!;
-
     public virtual DbSet<RepairType> RepairTypes { get; set; } = null!;
-
     public virtual DbSet<RepairTypeForDevice> RepairTypeForDevices { get; set; } = null!;
-
     public virtual DbSet<RepairTypesList> RepairTypesLists { get; set; } = null!;
-
     public virtual DbSet<RequestStatusHistory> RequestStatusHistories { get; set; } = null!;
 
+
     // TODO: Add more methods for the stored procedures
-    public virtual IQueryable<ClientInfoResult> GetClientInfo(int? inputId) =>
-        FromExpression(() => GetClientInfo((int?)inputId));
+    public virtual IQueryable<GetUserLoginByTelephoneResult> GetUserLoginByTelephone(string inputTelephone,
+        string inputSecretKey) =>
+        FromExpression(() => GetUserLoginByTelephone(inputTelephone, inputSecretKey));
 
-    public virtual IQueryable<EmployeeInfoResult> GetEmployeeInfo(int? inputId) =>
-        FromExpression(() => GetEmployeeInfo((int?)inputId));
+    public virtual IQueryable<CreateClientResult> CreateClient(string inputFirstName, string inputSecondName,
+        string inputTelephoneNumber, int discountPercentage, string inputLogin, string inputPasswordHash,
+        string secretKey) =>
+        FromExpression(() => CreateClient(inputFirstName, inputSecondName, inputTelephoneNumber, discountPercentage,
+            inputLogin, inputPasswordHash, secretKey));
 
+    public virtual IQueryable<CreateEmployeeResult> CreateEmployee(string inputFirstName, string inputSecondName,
+        string inputTelephoneNumber, int experienceYears, int yearsInCompany, int rating, string inputLogin,
+        string inputPasswordHash, string secretKey, string inputRole) =>
+        FromExpression(() => CreateEmployee(inputFirstName, inputSecondName, inputTelephoneNumber, experienceYears,
+            yearsInCompany, rating, inputLogin, inputPasswordHash, secretKey, inputRole));
+
+    // TODO: use all stored procedures in controllers
     public virtual IQueryable<MasterRankingResult> GetMasterRanking(DateTime? inputPeriodStart,
         DateTime? inputPeriodEnd) =>
-        FromExpression(() => GetMasterRanking((DateTime?)inputPeriodStart, (DateTime?)inputPeriodEnd));
+        FromExpression(() => GetMasterRanking(inputPeriodStart, inputPeriodEnd));
 
     public virtual IQueryable<PartsInfoResult> GetPartsLessMinCountInfo() =>
         FromExpression(() => GetPartsLessMinCountInfo());
@@ -57,35 +69,47 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
     public virtual IQueryable<PartsInfoResult> GetPartsMoreMinCountInfo() =>
         FromExpression(() => GetPartsMoreMinCountInfo());
 
-    // TODO: Rework entity configurations with attributes in []
+    public virtual IQueryable<RepairCostResult> CalculateRepairCost(int? inputRequestId) =>
+        FromExpression(() => CalculateRepairCost(inputRequestId));
+
+    public virtual IQueryable<RepairRequestInfoResult> GetRequestInfo(int? inputRequestId) =>
+        FromExpression(() => GetRequestInfo(inputRequestId));
+
+    public virtual IQueryable<RepairTypeInfoResult> GetRepairTypeInfoResult(int? inputDeviceId) =>
+        FromExpression(() => GetRepairTypeInfoResult(inputDeviceId));
+
+    private static void RegisterFunctions(ModelBuilder modelBuilder)
+    {
+        // STORED PROCEDURES
+        RegisterDbFunction(modelBuilder, nameof(GetUserLoginByTelephone), "get_user_login_by_telephone",
+            typeof(GetUserLoginByTelephoneResult));
+        RegisterDbFunction(modelBuilder, nameof(CreateClient), "create_client", typeof(CreateClientResult));
+        RegisterDbFunction(modelBuilder, nameof(CreateEmployee), "create_employee", typeof(CreateEmployeeResult));
+        RegisterDbFunction(modelBuilder, nameof(GetMasterRanking), "get_master_ranking",
+            typeof(MasterRankingResult));
+        RegisterDbFunction(modelBuilder, nameof(GetPartsLessMinCountInfo), "get_parts_less_min_count_info",
+            typeof(PartsInfoResult));
+        RegisterDbFunction(modelBuilder, nameof(GetPartsMoreMinCountInfo), "get_parts_more_min_count_info",
+            typeof(PartsInfoResult));
+        RegisterDbFunction(modelBuilder, nameof(CalculateRepairCost), "calculate_repair_cost",
+            typeof(RepairCostResult));
+        RegisterDbFunction(modelBuilder, nameof(GetRequestInfo), "get_request_info",
+            typeof(RepairRequestInfoResult));
+        RegisterDbFunction(modelBuilder, nameof(GetRepairTypeInfoResult), "get_repair_type_info_result",
+            typeof(RepairTypeInfoResult));
+    }
+
+    private static void RegisterDbFunction(ModelBuilder modelBuilder, string methodName, string functionName,
+        Type? returnType = null)
+    {
+        modelBuilder.HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(methodName)!).HasName(functionName);
+        if (returnType != null) modelBuilder.Entity(returnType).HasNoKey();
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Stored procedure
-        modelBuilder
-            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetClientInfo))!)
-            .HasName("get_client_info");
-
-        modelBuilder
-            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetEmployeeInfo))!)
-            .HasName("get_employee_info");
-
-        modelBuilder
-            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetMasterRanking))!)
-            .HasName("get_master_ranking");
-        
-        modelBuilder
-            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetPartsLessMinCountInfo))!)
-            .HasName("get_parts_less_min_count_info");
-        
-        modelBuilder
-            .HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(nameof(GetPartsMoreMinCountInfo))!)
-            .HasName("get_parts_more_min_count_info");
-
-        modelBuilder.Entity(typeof(ClientInfoResult)).HasNoKey();
-        modelBuilder.Entity(typeof(EmployeeInfoResult)).HasNoKey();
-        modelBuilder.Entity(typeof(MasterRankingResult)).HasNoKey();
-        modelBuilder.Entity(typeof(PartsInfoResult)).HasNoKey();
-
+        // Register stored functions
+        RegisterFunctions(modelBuilder);
 
         // Stored entity configurations
         modelBuilder.Entity<AllowedRepairTypesForEmployee>(entity =>
@@ -121,6 +145,15 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DbUserId).HasColumnName("db_user_id");
             entity.Property(e => e.DiscountPercentage).HasColumnName("discount_percentage");
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(255)
+                .HasColumnName("first_name");
+            entity.Property(e => e.SecondName)
+                .HasMaxLength(255)
+                .HasColumnName("second_name");
+            entity.Property(e => e.TelephoneNumber)
+                .HasMaxLength(255)
+                .HasColumnName("telephone_number");
 
             entity.HasOne(d => d.DbUser).WithOne(p => p.Client)
                 .HasForeignKey<Client>(d => d.DbUserId)
@@ -137,24 +170,18 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.HasIndex(e => e.Login, "db_user_login_key").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.FirstName)
-                .HasMaxLength(255)
-                .HasColumnName("first_name");
             entity.Property(e => e.Login)
                 .HasMaxLength(255)
                 .HasColumnName("login");
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(255)
                 .HasColumnName("password_hash");
-            entity.Property(e => e.SecondName)
-                .HasMaxLength(255)
-                .HasColumnName("second_name");
-            entity.Property(e => e.TelephoneNumber)
-                .HasMaxLength(255)
-                .HasColumnName("telephone_number");
             entity.Property(e => e.Role)
                 .HasMaxLength(255)
                 .HasColumnName("role");
+            entity.Property(e => e.SecretKey)
+                .HasMaxLength(255)
+                .HasColumnName("secret_key");
         });
 
         modelBuilder.Entity<Device>(entity =>
@@ -166,11 +193,21 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.HasIndex(e => e.Name, "device_name_key").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Name).HasMaxLength(255).HasColumnName("name");
-            entity.Property(e => e.Type).HasMaxLength(255).HasColumnName("type");
-            entity.Property(e => e.Brand).HasMaxLength(255).HasColumnName("brand");
-            entity.Property(e => e.Series).HasMaxLength(255).HasColumnName("series");
-            entity.Property(e => e.Manufacturer).HasMaxLength(255).HasColumnName("manufacturer");
+            entity.Property(e => e.Brand)
+                .HasMaxLength(255)
+                .HasColumnName("brand");
+            entity.Property(e => e.Manufacturer)
+                .HasMaxLength(255)
+                .HasColumnName("manufacturer");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.Series)
+                .HasMaxLength(255)
+                .HasColumnName("series");
+            entity.Property(e => e.Type)
+                .HasMaxLength(255)
+                .HasColumnName("type");
         });
 
         modelBuilder.Entity<Employee>(entity =>
@@ -183,6 +220,18 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DbUserId).HasColumnName("db_user_id");
+            entity.Property(e => e.ExperienceYears).HasColumnName("experience_years");
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(255)
+                .HasColumnName("first_name");
+            entity.Property(e => e.Rating).HasColumnName("rating");
+            entity.Property(e => e.SecondName)
+                .HasMaxLength(255)
+                .HasColumnName("second_name");
+            entity.Property(e => e.TelephoneNumber)
+                .HasMaxLength(255)
+                .HasColumnName("telephone_number");
+            entity.Property(e => e.YearsInCompany).HasColumnName("years_in_company");
 
             entity.HasOne(d => d.DbUser).WithOne(p => p.Employee)
                 .HasForeignKey<Employee>(d => d.DbUserId)
@@ -204,11 +253,11 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.Property(e => e.RepairPartId).HasColumnName("repair_part_id");
             entity.Property(e => e.RepairTypeForDeviceId).HasColumnName("repair_type_for_device_id");
 
-            entity.HasOne(d => d.RepairPart).WithMany(p => p.PartForRepairParts)
+            entity.HasOne(d => d.RepairPart).WithMany(p => p.PartForRepairTypes)
                 .HasForeignKey(d => d.RepairPartId)
                 .HasConstraintName("part_for_repair_type_repair_part_id_fkey");
 
-            entity.HasOne(d => d.RepairTypeForDevice).WithMany(p => p.PartForRepairParts)
+            entity.HasOne(d => d.RepairTypeForDevice).WithMany(p => p.PartForRepairTypes)
                 .HasForeignKey(d => d.RepairTypeForDeviceId)
                 .HasConstraintName("part_for_repair_type_repair_type_for_device_id_fkey");
         });
@@ -222,6 +271,9 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.HasIndex(e => e.Name, "repair_part_name_key").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Condition)
+                .HasMaxLength(255)
+                .HasColumnName("condition");
             entity.Property(e => e.Cost).HasColumnName("cost");
             entity.Property(e => e.CurrentCount).HasColumnName("current_count");
             entity.Property(e => e.MinAllowedCount).HasColumnName("min_allowed_count");
@@ -231,9 +283,6 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.Property(e => e.Specification)
                 .HasMaxLength(255)
                 .HasColumnName("specification");
-            entity.Property(e => e.Condition)
-                .HasMaxLength(255)
-                .HasColumnName("condition");
         });
 
         modelBuilder.Entity<RepairRequest>(entity =>
@@ -244,6 +293,7 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ClientId).HasColumnName("client_id");
+            entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.DeviceId).HasColumnName("device_id");
             entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
             entity.Property(e => e.SerialNumber)
@@ -289,9 +339,9 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Cost).HasColumnName("cost");
+            entity.Property(e => e.DaysToComplete).HasColumnName("days_to_complete");
             entity.Property(e => e.DeviceId).HasColumnName("device_id");
             entity.Property(e => e.RepairTypeId).HasColumnName("repair_type_id");
-            entity.Property(e => e.Time).HasColumnName("time");
 
             entity.HasOne(d => d.Device).WithMany(p => p.RepairTypeForDevices)
                 .HasForeignKey(d => d.DeviceId)
@@ -336,10 +386,11 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Date)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("date");
             entity.Property(e => e.RepairRequestId).HasColumnName("repair_request_id");
-            entity.Property(e => e.RequestStatus).HasMaxLength(255).HasColumnName("status");
+            entity.Property(e => e.Status)
+                .HasMaxLength(255)
+                .HasColumnName("status");
 
             entity.HasOne(d => d.RepairRequest).WithMany(p => p.RequestStatusHistories)
                 .HasForeignKey(d => d.RepairRequestId)

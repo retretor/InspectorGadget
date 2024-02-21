@@ -5,5 +5,7 @@ public enum Role
     CLIENT,
     ADMIN,
     RECEPTIONIST,
-    MASTER
+    MASTER,
+    
+    ANONYMOUS
 }
