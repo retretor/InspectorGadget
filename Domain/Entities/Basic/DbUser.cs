@@ -15,17 +15,4 @@ public class DbUser : BaseEntity
     public virtual Client? Client { get; set; }
 
     public virtual Employee? Employee { get; set; }
-
-    public DbUser(int id, string login, string passwordHash, string secretKey, string role)
-    {
-        Id = id;
-        Login = login;
-        PasswordHash = passwordHash;
-        SecretKey = secretKey;
-        Role = role;
-    }
-
-    public DbUser()
-    {
-    }
 }
