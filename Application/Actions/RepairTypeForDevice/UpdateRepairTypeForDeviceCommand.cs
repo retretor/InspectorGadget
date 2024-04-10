@@ -9,7 +9,7 @@ namespace Application.Actions.RepairTypeForDevice;
 
 public class UpdateRepairTypeForDeviceCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public float Cost { get; init; }
     public int DaysToComplete { get; init; }
     public int RepairTypeId { get; init; }
@@ -33,11 +33,11 @@ public class UpdateRepairTypeForDeviceHandler : IRequestHandler<UpdateRepairType
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.RepairTypeForDevices.FindAsync(request.Id);
+        var entity = await request.DbContext.RepairTypeForDevices.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(RepairTypeForDevice), request.Id));
+            return Result.Failure(new NotFoundException(nameof(RepairTypeForDevice), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -51,7 +51,7 @@ public class UpdateRepairTypeForDeviceValidator : AbstractValidator<UpdateRepair
 {
     public UpdateRepairTypeForDeviceValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.Cost).NotEmpty().GreaterThan(0);
         RuleFor(x => x.DaysToComplete).NotEmpty().GreaterThan(0);
         RuleFor(x => x.RepairTypeId).NotEmpty();

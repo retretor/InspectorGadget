@@ -28,7 +28,7 @@ public class JwtService
         {
             new(ClaimTypes.NameIdentifier, user.Login),
             new(ClaimTypes.Role, user.Role),
-            new(ClaimTypes.Sid, user.Id.ToString()),
+            new(ClaimTypes.Sid, user.EntityId.ToString()),
             new(ClaimTypes.UserData, user.SecretKey)
         };
 

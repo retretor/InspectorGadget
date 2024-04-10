@@ -33,7 +33,7 @@ public class GetClientHandler : IRequestHandler<GetClientQuery, (Result, Domain.
         }
 
         var entity = await request.DbContext.Clients
-            .FirstOrDefaultAsync(client => client.Id == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(client => client.EntityId == request.Id, cancellationToken);
         if (entity == null)
         {
             return (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), request.Id)), null);

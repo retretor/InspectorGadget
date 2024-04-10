@@ -38,7 +38,7 @@ public class CreateRepairPartHandler : IRequestHandler<CreateRepairPartCommand, 
         var entity = _mapper.Map<Domain.Entities.Basic.RepairPart>(request);
         request.DbContext.RepairParts.Add(entity);
         await request.DbContext.SaveChangesAsync(cancellationToken);
-        return (Result.Success(), entity.Id);
+        return (Result.Success(), entity.EntityId);
     }
 }
 

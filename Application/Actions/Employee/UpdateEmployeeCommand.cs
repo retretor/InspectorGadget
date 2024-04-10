@@ -9,7 +9,7 @@ namespace Application.Actions.Employee;
 
 public class UpdateEmployeeCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public string FirstName { get; set; } = null!;
     public string SecondName { get; set; } = null!;
     public string TelephoneNumber { get; set; } = null!;
@@ -35,11 +35,11 @@ public class UpdateEmployeeHandler : IRequestHandler<UpdateEmployeeCommand, Resu
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.Employees.FindAsync(request.Id);
+        var entity = await request.DbContext.Employees.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), request.Id));
+            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -53,7 +53,7 @@ public class UpdateEmployeeValidator : AbstractValidator<UpdateEmployeeCommand>
 {
     public UpdateEmployeeValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.FirstName).NotEmpty().MaximumLength(255);
         RuleFor(x => x.SecondName).NotEmpty().MaximumLength(255);
         RuleFor(x => x.TelephoneNumber).NotEmpty()

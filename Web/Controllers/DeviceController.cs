@@ -78,9 +78,8 @@ public class DeviceController : ControllerBase
 
     [HttpPut("{id}")]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
-    public async Task<IActionResult> Update(int id, [FromQuery] UpdateDeviceCommand command)
+    public async Task<IActionResult> Update([FromQuery] UpdateDeviceCommand command)
     {
-        if (id != command.Id) return BadRequest();
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
         if (dbContext == null)
         {

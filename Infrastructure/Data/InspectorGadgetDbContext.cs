@@ -114,14 +114,14 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
         // Stored entity configurations
         modelBuilder.Entity<AllowedRepairTypesForEmployee>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("allowed_repair_types_for_employee_pkey");
+            entity.HasKey(e => e.EntityId).HasName("allowed_repair_types_for_employee_pkey");
 
             entity.ToTable("allowed_repair_types_for_employee");
 
             entity.HasIndex(e => new { e.RepairTypeForDeviceId, e.EmployeeId },
                 "allowed_repair_types_for_empl_repair_type_for_device_id_emp_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
             entity.Property(e => e.RepairTypeForDeviceId).HasColumnName("repair_type_for_device_id");
 
@@ -136,13 +136,13 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<Client>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("client_pkey");
+            entity.HasKey(e => e.EntityId).HasName("client_pkey");
 
             entity.ToTable("client");
 
             entity.HasIndex(e => e.DbUserId, "client_db_user_id_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.DbUserId).HasColumnName("db_user_id");
             entity.Property(e => e.DiscountPercentage).HasColumnName("discount_percentage");
             entity.Property(e => e.FirstName)
@@ -163,13 +163,13 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<DbUser>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("db_user_pkey");
+            entity.HasKey(e => e.EntityId).HasName("db_user_pkey");
 
             entity.ToTable("db_user");
 
             entity.HasIndex(e => e.Login, "db_user_login_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.Login)
                 .HasMaxLength(255)
                 .HasColumnName("login");
@@ -186,13 +186,13 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<Device>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("device_pkey");
+            entity.HasKey(e => e.EntityId).HasName("device_pkey");
 
             entity.ToTable("device");
 
             entity.HasIndex(e => e.Name, "device_name_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.Brand)
                 .HasMaxLength(255)
                 .HasColumnName("brand");
@@ -212,13 +212,13 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<Employee>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("employee_pkey");
+            entity.HasKey(e => e.EntityId).HasName("employee_pkey");
 
             entity.ToTable("employee");
 
             entity.HasIndex(e => e.DbUserId, "employee_db_user_id_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.DbUserId).HasColumnName("db_user_id");
             entity.Property(e => e.ExperienceYears).HasColumnName("experience_years");
             entity.Property(e => e.FirstName)
@@ -241,14 +241,14 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<PartForRepairType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("part_for_repair_type_pkey");
+            entity.HasKey(e => e.EntityId).HasName("part_for_repair_type_pkey");
 
             entity.ToTable("part_for_repair_type");
 
             entity.HasIndex(e => new { e.RepairTypeForDeviceId, e.RepairPartId },
                 "part_for_repair_type_repair_type_for_device_id_repair_part__key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.PartCount).HasColumnName("part_count");
             entity.Property(e => e.RepairPartId).HasColumnName("repair_part_id");
             entity.Property(e => e.RepairTypeForDeviceId).HasColumnName("repair_type_for_device_id");
@@ -264,13 +264,13 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<RepairPart>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("repair_part_pkey");
+            entity.HasKey(e => e.EntityId).HasName("repair_part_pkey");
 
             entity.ToTable("repair_part");
 
             entity.HasIndex(e => e.Name, "repair_part_name_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.Condition)
                 .HasMaxLength(255)
                 .HasColumnName("condition");
@@ -287,11 +287,11 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<RepairRequest>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("repair_request_pkey");
+            entity.HasKey(e => e.EntityId).HasName("repair_request_pkey");
 
             entity.ToTable("repair_request");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.ClientId).HasColumnName("client_id");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.DeviceId).HasColumnName("device_id");
@@ -318,11 +318,11 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<RepairType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("repair_type_pkey");
+            entity.HasKey(e => e.EntityId).HasName("repair_type_pkey");
 
             entity.ToTable("repair_type");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .HasColumnName("name");
@@ -330,14 +330,14 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<RepairTypeForDevice>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("repair_type_for_device_pkey");
+            entity.HasKey(e => e.EntityId).HasName("repair_type_for_device_pkey");
 
             entity.ToTable("repair_type_for_device");
 
             entity.HasIndex(e => new { e.RepairTypeId, e.DeviceId },
                 "repair_type_for_device_repair_type_id_device_id_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.Cost).HasColumnName("cost");
             entity.Property(e => e.DaysToComplete).HasColumnName("days_to_complete");
             entity.Property(e => e.DeviceId).HasColumnName("device_id");
@@ -355,14 +355,14 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<RepairTypesList>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("repair_types_list_pkey");
+            entity.HasKey(e => e.EntityId).HasName("repair_types_list_pkey");
 
             entity.ToTable("repair_types_list");
 
             entity.HasIndex(e => new { e.RepairRequestId, e.RepairTypeForDeviceId },
                 "repair_types_list_repair_request_id_repair_type_for_device__key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.RepairRequestId).HasColumnName("repair_request_id");
             entity.Property(e => e.RepairTypeForDeviceId).HasColumnName("repair_type_for_device_id");
 
@@ -379,11 +379,11 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<RequestStatusHistory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("request_status_history_pkey");
+            entity.HasKey(e => e.EntityId).HasName("request_status_history_pkey");
 
             entity.ToTable("request_status_history");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.Date)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("date");

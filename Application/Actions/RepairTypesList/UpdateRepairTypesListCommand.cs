@@ -9,7 +9,7 @@ namespace Application.Actions.RepairTypesList;
 
 public class UpdateRepairTypesListCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public int RepairTypeForDeviceId { get; init; }
     public int RepairRequestId { get; init; }
     public IApplicationDbContext? DbContext { get; set; }
@@ -30,11 +30,11 @@ public class UpdateRepairTypesListHandler : IRequestHandler<UpdateRepairTypesLis
         {
             return Result.Failure(new InvalidDbContextException());
         }
-        var entity = await request.DbContext.RepairTypesLists.FindAsync(request.Id);
+        var entity = await request.DbContext.RepairTypesLists.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairTypesList), request.Id));
+            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairTypesList), request.EntityId));
         }
         
         _mapper.Map(request, entity);
@@ -48,7 +48,7 @@ public class UpdateRepairTypesListValidator : AbstractValidator<UpdateRepairType
 {
     public UpdateRepairTypesListValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.RepairTypeForDeviceId).NotEmpty();
         RuleFor(x => x.RepairRequestId).NotEmpty();
     }

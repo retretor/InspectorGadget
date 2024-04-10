@@ -10,7 +10,7 @@ namespace Application.Actions.Device;
 
 public class UpdateDeviceCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public string Name { get; init; } = null!;
     public string Type { get; init; } = null!;
     public string Brand { get; init; } = null!;
@@ -35,11 +35,11 @@ public class UpdateDeviceHandler : IRequestHandler<UpdateDeviceCommand, Result>
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.Devices.FindAsync(request.Id);
+        var entity = await request.DbContext.Devices.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Device), request.Id));
+            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Device), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -53,7 +53,7 @@ public class UpdateDeviceValidator : AbstractValidator<UpdateDeviceCommand>
 {
     public UpdateDeviceValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.Name).NotEmpty().MaximumLength(255);
         RuleFor(x => x.Type).NotEmpty().IsEnumName(typeof(DeviceType));
         RuleFor(x => x.Brand).NotEmpty().MaximumLength(255);

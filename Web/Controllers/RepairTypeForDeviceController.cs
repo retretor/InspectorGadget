@@ -78,9 +78,8 @@ public class RepairTypeForDeviceController : ControllerBase
 
     [HttpPut("{id}")]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
-    public async Task<IActionResult> Update(int id, [FromQuery] UpdateRepairTypeForDeviceCommand command)
+    public async Task<IActionResult> Update([FromQuery] UpdateRepairTypeForDeviceCommand command)
     {
-        if (id != command.Id) return BadRequest();
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
         if (dbContext == null)
         {

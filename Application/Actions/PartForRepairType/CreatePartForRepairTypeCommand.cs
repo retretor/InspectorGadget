@@ -35,7 +35,7 @@ public class CreatePartForRepairTypeHandler : IRequestHandler<CreatePartForRepai
 
         request.DbContext.PartForRepairTypes.Add(entity);
         await request.DbContext.SaveChangesAsync(cancellationToken);
-        return (Result.Success(), entity.Id);
+        return (Result.Success(), entity.EntityId);
     }
 }
 

@@ -2,5 +2,5 @@
 
 public abstract class BaseEntity
 {
-    public int Id { get; set; }
+    public int EntityId { get; set; }
 }

@@ -36,7 +36,7 @@ public class
 
         request.DbContext.AllowedRepairTypesForEmployees.Add(entity);
         await request.DbContext.SaveChangesAsync(cancellationToken);
-        return (Result.Success(), entity.Id);
+        return (Result.Success(), entity.EntityId);
     }
 }
 

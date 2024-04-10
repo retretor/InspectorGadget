@@ -9,7 +9,7 @@ namespace Application.Actions.AllowedRepairTypesForEmployee;
 
 public class UpdateAllowedRepairTypesForEmployeeCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public int EmployeeId { get; init; }
     public int RepairTypeId { get; init; }
     public IApplicationDbContext? DbContext { get; set; }
@@ -33,10 +33,10 @@ public class
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.AllowedRepairTypesForEmployees.FindAsync(request.Id);
+        var entity = await request.DbContext.AllowedRepairTypesForEmployees.FindAsync(request.EntityId);
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(AllowedRepairTypesForEmployee), request.Id));
+            return Result.Failure(new NotFoundException(nameof(AllowedRepairTypesForEmployee), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -51,7 +51,7 @@ public class
 {
     public UpdateAllowedRepairTypesForEmployeeValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.RepairTypeId).NotEmpty();
         RuleFor(x => x.EmployeeId).NotEmpty();
     }

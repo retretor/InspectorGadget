@@ -10,7 +10,7 @@ namespace Application.Actions.DbUser;
 
 public class UpdateDbUserCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public string Login { get; init; } = null!;
     public string PasswordHash { get; init; } = null!;
     public string SecretKey { get; set; } = null!;
@@ -34,11 +34,11 @@ public class UpdateDbUserHandler : IRequestHandler<UpdateDbUserCommand, Result>
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.DbUsers.FindAsync(request.Id);
+        var entity = await request.DbContext.DbUsers.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.DbUser), request.Id));
+            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.DbUser), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -52,7 +52,7 @@ public class UpdateDbUserValidator : AbstractValidator<UpdateDbUserCommand>
 {
     public UpdateDbUserValidator()
     {
-        RuleFor(x => x.Id).NotEmpty().GreaterThan(0);
+        RuleFor(x => x.EntityId).NotEmpty().GreaterThan(0);
         RuleFor(x => x.Login).NotEmpty().MaximumLength(255);
         RuleFor(x => x.PasswordHash).NotEmpty().MaximumLength(255);
         RuleFor(x => x.SecretKey).NotEmpty().MaximumLength(255);

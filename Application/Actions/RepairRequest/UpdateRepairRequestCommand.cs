@@ -9,7 +9,7 @@ namespace Application.Actions.RepairRequest;
 
 public class UpdateRepairRequestCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public int DeviceId { get; init; }
     public int ClientId { get; init; }
     public int EmployeeId { get; init; }
@@ -34,11 +34,11 @@ public class UpdateRepairRequestHandler : IRequestHandler<UpdateRepairRequestCom
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.RepairRequests.FindAsync(request.Id);
+        var entity = await request.DbContext.RepairRequests.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(RepairRequest), request.Id));
+            return Result.Failure(new NotFoundException(nameof(RepairRequest), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -52,7 +52,7 @@ public class UpdateRepairRequestValidator : AbstractValidator<UpdateRepairReques
 {
     public UpdateRepairRequestValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.DeviceId).NotEmpty();
         RuleFor(x => x.ClientId).NotEmpty();
         RuleFor(x => x.EmployeeId).NotEmpty();

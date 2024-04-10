@@ -10,7 +10,7 @@ namespace Application.Actions.RepairPart;
 
 public class UpdateRepairPartCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public string Name { get; init; } = null!;
     public string Specification { get; init; } = null!;
     public int CurrentCount { get; init; }
@@ -36,11 +36,11 @@ public class UpdateRepairPartHandler : IRequestHandler<UpdateRepairPartCommand, 
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.RepairParts.FindAsync(request.Id);
+        var entity = await request.DbContext.RepairParts.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairPart), request.Id));
+            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairPart), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -54,7 +54,7 @@ public class UpdateRepairPartValidator : AbstractValidator<UpdateRepairPartComma
 {
     public UpdateRepairPartValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.Name).NotEmpty().MaximumLength(255);
         RuleFor(x => x.Specification).NotEmpty();
         RuleFor(x => x.CurrentCount).NotEmpty().GreaterThanOrEqualTo(0);

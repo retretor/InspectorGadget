@@ -16,7 +16,7 @@ public class AppDbContextProvider : IAppDbContextProvider
         _configuration = configuration;
     }
 
-    
+
     public IApplicationDbContext? GetDbContext(Role role)
     {
         if (_contexts.TryGetValue(role, out var context)) return context;

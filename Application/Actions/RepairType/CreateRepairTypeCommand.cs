@@ -32,7 +32,7 @@ public class CreateRepairTypeHandler : IRequestHandler<CreateRepairTypeCommand, 
         var entity = _mapper.Map<Domain.Entities.Basic.RepairType>(request);
         request.DbContext.RepairTypes.Add(entity);
         await request.DbContext.SaveChangesAsync(cancellationToken);
-        return (Result.Success(), entity.Id);
+        return (Result.Success(), entity.EntityId);
     }
 }
 

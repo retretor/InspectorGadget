@@ -34,7 +34,7 @@ public class CreateRepairTypeForDeviceHandler : IRequestHandler<CreateRepairType
         var entity = _mapper.Map<Domain.Entities.Basic.RepairTypeForDevice>(request);
         request.DbContext.RepairTypeForDevices.Add(entity);
         await request.DbContext.SaveChangesAsync(cancellationToken);
-        return (Result.Success(), entity.Id);
+        return (Result.Success(), entity.EntityId);
     }
 }
 

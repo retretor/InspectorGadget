@@ -36,7 +36,7 @@ public class CreateRequestStatusHistoryHandler : IRequestHandler<CreateRequestSt
 
         request.DbContext.RequestStatusHistories.Add(entity);
         await request.DbContext.SaveChangesAsync(cancellationToken);
-        return (Result.Success(), entity.Id);
+        return (Result.Success(), entity.EntityId);
     }
 }
 

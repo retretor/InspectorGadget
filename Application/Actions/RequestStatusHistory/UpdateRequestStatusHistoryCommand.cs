@@ -10,7 +10,7 @@ namespace Application.Actions.RequestStatusHistory;
 
 public class UpdateRequestStatusHistoryCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public DateTime Date { get; init; }
     public int RepairRequestId { get; init; }
     public string RequestStatus { get; init; } = null!;
@@ -33,12 +33,12 @@ public class UpdateRequestStatusHistoryHandler : IRequestHandler<UpdateRequestSt
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.RequestStatusHistories.FindAsync(request.Id);
+        var entity = await request.DbContext.RequestStatusHistories.FindAsync(request.EntityId);
 
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RequestStatusHistory),
-                request.Id));
+                request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -52,7 +52,7 @@ public class UpdateRequestStatusHistoryValidator : AbstractValidator<UpdateReque
 {
     public UpdateRequestStatusHistoryValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.Date).NotEmpty();
         RuleFor(x => x.RepairRequestId).NotEmpty();
         RuleFor(x => x.RequestStatus).NotEmpty().IsEnumName(typeof(RequestStatus));

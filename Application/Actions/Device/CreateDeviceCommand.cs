@@ -37,7 +37,7 @@ public class CreateDeviceHandler : IRequestHandler<CreateDeviceCommand, (Result,
 
         request.DbContext.Devices.Add(entity);
         await request.DbContext.SaveChangesAsync(cancellationToken);
-        return (Result.Success(), entity.Id);
+        return (Result.Success(), entity.EntityId);
     }
 }
 

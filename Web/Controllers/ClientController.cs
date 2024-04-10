@@ -81,9 +81,8 @@ public class ClientController : ControllerBase
 
     [HttpPut("{id}")]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST })]
-    public async Task<IActionResult> Update(int id, [FromQuery] UpdateClientCommand command)
+    public async Task<IActionResult> Update([FromQuery] UpdateClientCommand command)
     {
-        if (id != command.Id) return BadRequest();
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
         if (dbContext == null)
         {

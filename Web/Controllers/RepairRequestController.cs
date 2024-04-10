@@ -78,9 +78,8 @@ public class RepairRequestController : ControllerBase
 
     [HttpPut("{id}")]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
-    public async Task<IActionResult> Update(int id, [FromQuery] UpdateRepairRequestCommand command)
+    public async Task<IActionResult> Update([FromQuery] UpdateRepairRequestCommand command)
     {
-        if (id != command.Id) return BadRequest();
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
         if (dbContext == null)
         {

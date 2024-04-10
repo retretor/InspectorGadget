@@ -9,7 +9,7 @@ namespace Application.Actions.RepairType;
 
 public class UpdateRepairTypeCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public string Name { get; init; } = null!;
     public IApplicationDbContext? DbContext { get; set; }
 }
@@ -30,11 +30,11 @@ public class UpdateRepairTypeHandler : IRequestHandler<UpdateRepairTypeCommand, 
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.RepairTypes.FindAsync(request.Id);
+        var entity = await request.DbContext.RepairTypes.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(RepairType), request.Id));
+            return Result.Failure(new NotFoundException(nameof(RepairType), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -48,7 +48,7 @@ public class UpdateRepairTypeValidator : AbstractValidator<UpdateRepairTypeComma
 {
     public UpdateRepairTypeValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
     }
 }

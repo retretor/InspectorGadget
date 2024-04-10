@@ -9,7 +9,7 @@ namespace Application.Actions.Client;
 
 public class UpdateClientCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int EntityId { get; init; }
     public string FirstName { get; init; } = null!;
     public string SecondName { get; init; } = null!;
     public string TelephoneNumber { get; init; } = null!;
@@ -33,11 +33,11 @@ public class UpdateClientHandler : IRequestHandler<UpdateClientCommand, Result>
             return Result.Failure(new InvalidDbContextException());
         }
 
-        var entity = await request.DbContext.Clients.FindAsync(request.Id);
+        var entity = await request.DbContext.Clients.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), request.Id));
+            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), request.EntityId));
         }
 
         _mapper.Map(request, entity);
@@ -51,7 +51,7 @@ public class UpdateClientValidator : AbstractValidator<UpdateClientCommand>
 {
     public UpdateClientValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.FirstName).NotEmpty().MaximumLength(255);
         RuleFor(x => x.SecondName).NotEmpty().MaximumLength(255);
         RuleFor(x => x.TelephoneNumber).NotEmpty()
