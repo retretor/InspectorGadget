@@ -22,10 +22,6 @@ public class
 public class GetRepairTypeForDeviceHandler : IRequestHandler<GetRepairTypeForDeviceQuery, (Result,
     Domain.Entities.Basic.RepairTypeForDevice?)>
 {
-    public GetRepairTypeForDeviceHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.RepairTypeForDevice?)> Handle(GetRepairTypeForDeviceQuery request,
         CancellationToken cancellationToken)
     {
@@ -45,10 +41,6 @@ public class GetRepairTypeForDeviceHandler : IRequestHandler<GetRepairTypeForDev
 public class GetAllRepairTypeForDevicesHandler : IRequestHandler<GetAllRepairTypeForDevicesQuery,
     (Result, IEnumerable<Domain.Entities.Basic.RepairTypeForDevice>?)>
 {
-    public GetAllRepairTypeForDevicesHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.RepairTypeForDevice>?)> Handle(
         GetAllRepairTypeForDevicesQuery request,
         CancellationToken cancellationToken)

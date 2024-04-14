@@ -14,8 +14,6 @@ namespace Web.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-
-// TODO: Add roles to the endpoints
 public class RepairTypeController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -28,7 +26,7 @@ public class RepairTypeController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST })]
+    [AllowAnonymous]
     public async Task<IActionResult> Get(int id)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -57,7 +55,7 @@ public class RepairTypeController : ControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Create([FromQuery] CreateRepairTypeCommand command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));

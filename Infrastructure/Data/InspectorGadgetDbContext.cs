@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces;
+﻿using System.Text;
+using Application.Common.Interfaces;
 using Domain.Entities.Basic;
 using Domain.Entities.Composite;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,8 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
         return optionsBuilder.Options;
     }
 
+    #region Sets
+
     public virtual DbSet<AllowedRepairTypesForEmployee> AllowedRepairTypesForEmployees { get; set; } = null!;
     public virtual DbSet<Client> Clients { get; set; } = null!;
     public virtual DbSet<DbUser> DbUsers { get; set; } = null!;
@@ -40,25 +43,44 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
     public virtual DbSet<RepairTypesList> RepairTypesLists { get; set; } = null!;
     public virtual DbSet<RequestStatusHistory> RequestStatusHistories { get; set; } = null!;
 
+    #endregion
 
-    // TODO: Add more methods for the stored procedures
-    public virtual IQueryable<GetUserLoginByTelephoneResult> GetUserLoginByTelephone(string inputTelephone,
+    #region Stored procedures
+
+    public virtual IQueryable<IntResult> AuthenticateUser(string inputLogin,
+        string inputPasswordHash) =>
+        FromExpression(() => AuthenticateUser(inputLogin, inputPasswordHash));
+
+    public virtual IQueryable<StringResult> GetUserLoginByTelephone(string inputTelephone,
         string inputSecretKey) =>
         FromExpression(() => GetUserLoginByTelephone(inputTelephone, inputSecretKey));
 
-    public virtual IQueryable<CreateClientResult> CreateClient(string inputFirstName, string inputSecondName,
+    public virtual IQueryable<IntResult> ChangePassword(string inputLogin, string inputOldPasswordHash,
+        string inputNewPasswordHash) =>
+        FromExpression(() => ChangePassword(inputLogin, inputOldPasswordHash, inputNewPasswordHash));
+
+    public virtual IQueryable<IntResult> CreateClient(string inputFirstName, string inputSecondName,
         string inputTelephoneNumber, int discountPercentage, string inputLogin, string inputPasswordHash,
         string secretKey) =>
         FromExpression(() => CreateClient(inputFirstName, inputSecondName, inputTelephoneNumber, discountPercentage,
             inputLogin, inputPasswordHash, secretKey));
 
-    public virtual IQueryable<CreateEmployeeResult> CreateEmployee(string inputFirstName, string inputSecondName,
+    public virtual IQueryable<IntResult> CreateEmployee(string inputFirstName, string inputSecondName,
         string inputTelephoneNumber, int experienceYears, int yearsInCompany, int rating, string inputLogin,
         string inputPasswordHash, string secretKey, string inputRole) =>
         FromExpression(() => CreateEmployee(inputFirstName, inputSecondName, inputTelephoneNumber, experienceYears,
             yearsInCompany, rating, inputLogin, inputPasswordHash, secretKey, inputRole));
 
-    // TODO: use all stored procedures in controllers
+    public IQueryable<BoolResult> UpdateEmployeeRole(int inputEmployeeId, string inputRole) =>
+        FromExpression(() => UpdateEmployeeRole(inputEmployeeId, inputRole));
+
+    public IQueryable<IntResult> GetPartsCount(int inputPartId) =>
+        FromExpression(() => GetPartsCount(inputPartId));
+
+    public IQueryable<BoolResult> ChangeRepairRequestStatus(int inputRepairRequestId, string inputStatus,
+        DateTime inputDate)
+        => FromExpression(() => ChangeRepairRequestStatus(inputRepairRequestId, inputStatus, inputDate));
+
     public virtual IQueryable<MasterRankingResult> GetMasterRanking(DateTime? inputPeriodStart,
         DateTime? inputPeriodEnd) =>
         FromExpression(() => GetMasterRanking(inputPeriodStart, inputPeriodEnd));
@@ -69,22 +91,35 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
     public virtual IQueryable<PartsInfoResult> GetPartsMoreMinCountInfo() =>
         FromExpression(() => GetPartsMoreMinCountInfo());
 
-    public virtual IQueryable<RepairCostResult> CalculateRepairCost(int? inputRequestId) =>
+    public virtual IQueryable<IntResult> CalculateRepairCost(int? inputRequestId) =>
         FromExpression(() => CalculateRepairCost(inputRequestId));
+
+    public IQueryable<IntResult> CalculateRepairTime(int? inputRequestId) =>
+        FromExpression(() => CalculateRepairTime(inputRequestId));
 
     public virtual IQueryable<RepairRequestInfoResult> GetRequestInfo(int? inputRequestId) =>
         FromExpression(() => GetRequestInfo(inputRequestId));
 
-    public virtual IQueryable<RepairTypeInfoResult> GetRepairTypeInfoResult(int? inputDeviceId) =>
-        FromExpression(() => GetRepairTypeInfoResult(inputDeviceId));
+    public virtual IQueryable<RepairTypeInfoResult> GetRepairTypesInfo(int? inputDeviceId) =>
+        FromExpression(() => GetRepairTypesInfo(inputDeviceId));
+
+    public IQueryable<AcceptRequestResult> AcceptRequest(int? inputRequestId) =>
+        FromExpression(() => AcceptRequest(inputRequestId));
+
+    public IQueryable<BoolResult> IsAvailableAllParts(int? inputRequestId) =>
+        FromExpression(() => IsAvailableAllParts(inputRequestId));
+
+    #endregion
 
     private static void RegisterFunctions(ModelBuilder modelBuilder)
     {
         // STORED PROCEDURES
+        RegisterDbFunction(modelBuilder, nameof(AuthenticateUser), "authenticate_user", typeof(IntResult));
         RegisterDbFunction(modelBuilder, nameof(GetUserLoginByTelephone), "get_user_login_by_telephone",
-            typeof(GetUserLoginByTelephoneResult));
-        RegisterDbFunction(modelBuilder, nameof(CreateClient), "create_client", typeof(CreateClientResult));
-        RegisterDbFunction(modelBuilder, nameof(CreateEmployee), "create_employee", typeof(CreateEmployeeResult));
+            typeof(StringResult));
+        RegisterDbFunction(modelBuilder, nameof(ChangePassword), "change_password", typeof(IntResult));
+        RegisterDbFunction(modelBuilder, nameof(CreateClient), "create_client", typeof(IntResult));
+        RegisterDbFunction(modelBuilder, nameof(CreateEmployee), "create_employee", typeof(IntResult));
         RegisterDbFunction(modelBuilder, nameof(GetMasterRanking), "get_master_ranking",
             typeof(MasterRankingResult));
         RegisterDbFunction(modelBuilder, nameof(GetPartsLessMinCountInfo), "get_parts_less_min_count_info",
@@ -92,18 +127,63 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
         RegisterDbFunction(modelBuilder, nameof(GetPartsMoreMinCountInfo), "get_parts_more_min_count_info",
             typeof(PartsInfoResult));
         RegisterDbFunction(modelBuilder, nameof(CalculateRepairCost), "calculate_repair_cost",
-            typeof(RepairCostResult));
+            typeof(IntResult));
         RegisterDbFunction(modelBuilder, nameof(GetRequestInfo), "get_request_info",
             typeof(RepairRequestInfoResult));
-        RegisterDbFunction(modelBuilder, nameof(GetRepairTypeInfoResult), "get_repair_type_info_result",
+        RegisterDbFunction(modelBuilder, nameof(GetRepairTypesInfo), "get_repair_type_info_result",
             typeof(RepairTypeInfoResult));
+        RegisterDbFunction(modelBuilder, nameof(AcceptRequest), "accept_request", typeof(AcceptRequestResult));
+        RegisterDbFunction(modelBuilder, nameof(IsAvailableAllParts), "is_available_all_parts", typeof(BoolResult));
+        RegisterDbFunction(modelBuilder, nameof(UpdateEmployeeRole), "update_employee_role", typeof(BoolResult));
+        RegisterDbFunction(modelBuilder, nameof(GetPartsCount), "get_parts_count", typeof(IntResult));
+        RegisterDbFunction(modelBuilder, nameof(ChangeRepairRequestStatus), "change_repair_request_status",
+            typeof(BoolResult));
+        RegisterDbFunction(modelBuilder, nameof(CalculateRepairTime), "calculate_repair_time", typeof(IntResult));
     }
-
     private static void RegisterDbFunction(ModelBuilder modelBuilder, string methodName, string functionName,
-        Type? returnType = null)
+        Type? returnType)
     {
         modelBuilder.HasDbFunction(typeof(InspectorGadgetDbContext).GetMethod(methodName)!).HasName(functionName);
         if (returnType != null) modelBuilder.Entity(returnType).HasNoKey();
+    }
+
+    // private static void RegisterFunctions(ModelBuilder modelBuilder)
+    // {
+    //     var methodInfos = typeof(InspectorGadgetDbContext).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+    //         .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(IQueryable<>));
+    //
+    //     foreach (var method in methodInfos)
+    //     {
+    //         var returnType = method.ReturnType.GenericTypeArguments[0];
+    //         var functionName = ConvertToSnakeCase(method.Name);
+    //
+    //         modelBuilder.HasDbFunction(method)
+    //             .HasName(functionName);
+    //         modelBuilder.Entity(returnType).HasNoKey();
+    //     }
+    // }
+
+    private static string ConvertToSnakeCase(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        var builder = new StringBuilder();
+        builder.Append(char.ToLowerInvariant(input[0]));
+
+        for (var i = 1; i < input.Length; i++)
+        {
+            if (char.IsUpper(input[i]))
+            {
+                builder.Append('_');
+                builder.Append(char.ToLowerInvariant(input[i]));
+            }
+            else
+            {
+                builder.Append(input[i]);
+            }
+        }
+
+        return builder.ToString();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

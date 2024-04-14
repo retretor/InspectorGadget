@@ -6,6 +6,10 @@ namespace Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+
+    #region Sets
+
     DbSet<DbUser> DbUsers { get; set; }
     DbSet<Client> Clients { get; set; }
     DbSet<Employee> Employees { get; set; }
@@ -19,28 +23,58 @@ public interface IApplicationDbContext
     DbSet<RepairTypesList> RepairTypesLists { get; set; }
     DbSet<RequestStatusHistory> RequestStatusHistories { get; set; }
 
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    #endregion
 
+    #region Stored Procedures
 
-    // SAVED PROCEDURES
-    public IQueryable<GetUserLoginByTelephoneResult> GetUserLoginByTelephone(string inputTelephone, string inputSecretKey);
+    // Authentication
+    public IQueryable<IntResult> AuthenticateUser(string inputLogin, string inputPasswordHash);
 
-    public IQueryable<CreateClientResult> CreateClient(string inputFirstName, string inputSecondName, string inputTelephoneNumber,
+    public IQueryable<StringResult> GetUserLoginByTelephone(string inputTelephone,
+        string inputSecretKey);
+
+    public IQueryable<IntResult> ChangePassword(string inputLogin, string inputOldPasswordHash,
+        string inputNewPasswordHash);
+
+    // Client
+    public IQueryable<IntResult> CreateClient(string inputFirstName,
+        string inputSecondName,
+        string inputTelephoneNumber,
         int discountPercentage,
-        string inputLogin, string inputPasswordHash, string secretKey);
+        string inputLogin,
+        string inputPasswordHash,
+        string secretKey);
 
-    public IQueryable<CreateEmployeeResult> CreateEmployee(string inputFirstName, string inputSecondName, string inputTelephoneNumber,
-        int experienceYears, int yearsInCompany, int rating, string inputLogin, string inputPasswordHash,
-        string secretKey, string inputRole);
-
+    // Employee
+    public IQueryable<IntResult> CreateEmployee(string inputFirstName,
+        string inputSecondName,
+        string inputTelephoneNumber,
+        int experienceYears,
+        int yearsInCompany,
+        int rating,
+        string inputLogin,
+        string inputPasswordHash,
+        string secretKey,
+        string inputRole);
+    public IQueryable<BoolResult> UpdateEmployeeRole(int inputEmployeeId, string inputRole);
     public IQueryable<MasterRankingResult> GetMasterRanking(DateTime? inputPeriodStart, DateTime? inputPeriodEnd);
 
+    // Parts
+    public IQueryable<IntResult> GetPartsCount(int inputPartId);
     public IQueryable<PartsInfoResult> GetPartsLessMinCountInfo();
-
     public IQueryable<PartsInfoResult> GetPartsMoreMinCountInfo();
 
-    public IQueryable<RepairCostResult> CalculateRepairCost(int? inputRequestId);
+    // Repair Request
+    public IQueryable<BoolResult> ChangeRepairRequestStatus(int inputRepairRequestId, string inputStatus,
+        DateTime inputDate);
+    public IQueryable<IntResult> CalculateRepairCost(int? inputRequestId);
+    public IQueryable<IntResult> CalculateRepairTime(int? inputRequestId);
+    public IQueryable<AcceptRequestResult> AcceptRequest(int? inputRequestId);
+    public IQueryable<BoolResult> IsAvailableAllParts(int? inputRequestId);
     public IQueryable<RepairRequestInfoResult> GetRequestInfo(int? inputRequestId);
 
-    public IQueryable<RepairTypeInfoResult> GetRepairTypeInfoResult(int? inputDeviceId);
+    // Device
+    public IQueryable<RepairTypeInfoResult> GetRepairTypesInfo(int? inputDeviceId);
+
+    #endregion
 }

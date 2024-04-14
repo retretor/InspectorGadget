@@ -14,10 +14,6 @@ public class DeleteEmployeeCommand : IRequest<Result>
 
 public class DeleteEmployeeHandler : IRequestHandler<DeleteEmployeeCommand, Result>
 {
-    public DeleteEmployeeHandler()
-    {
-    }
-
     public async Task<Result> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
     {
         if (request.DbContext == null)

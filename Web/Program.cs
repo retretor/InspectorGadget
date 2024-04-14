@@ -17,7 +17,10 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
 
 // Add swagger
-builder.Services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Inspector Gadgets API", Version = "v1" }); });
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Inspector Gadgets API", Version = "v1" });
+});
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
 // Add cors
@@ -56,10 +59,3 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-
-
-// TODO:
-/*
-Изменить доступ ролей к некоторым контроллерам
-
-*/

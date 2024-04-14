@@ -21,10 +21,6 @@ public class GetAllPartForRepairTypesQuery : IRequest<(Result, IEnumerable<Domai
 public class GetPartForRepairTypeHandler : IRequestHandler<GetPartForRepairTypeQuery, (Result,
     Domain.Entities.Basic.PartForRepairType?)>
 {
-    public GetPartForRepairTypeHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.PartForRepairType?)> Handle(GetPartForRepairTypeQuery request,
         CancellationToken cancellationToken)
     {
@@ -43,10 +39,6 @@ public class GetPartForRepairTypeHandler : IRequestHandler<GetPartForRepairTypeQ
 public class GetAllPartForRepairTypesHandler : IRequestHandler<GetAllPartForRepairTypesQuery, (Result,
     IEnumerable<Domain.Entities.Basic.PartForRepairType>?)>
 {
-    public GetAllPartForRepairTypesHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.PartForRepairType>?)> Handle(
         GetAllPartForRepairTypesQuery request,
         CancellationToken cancellationToken)

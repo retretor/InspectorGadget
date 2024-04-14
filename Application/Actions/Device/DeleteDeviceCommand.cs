@@ -14,10 +14,6 @@ public class DeleteDeviceCommand : IRequest<Result>
 
 public class DeleteDeviceHandler : IRequestHandler<DeleteDeviceCommand, Result>
 {
-    public DeleteDeviceHandler()
-    {
-    }
-
     public async Task<Result> Handle(DeleteDeviceCommand request, CancellationToken cancellationToken)
     {
         if (request.DbContext == null)

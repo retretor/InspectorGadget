@@ -24,10 +24,6 @@ public class
 public class GetAllowedRepairTypesForEmployeeHandler : IRequestHandler<GetAllowedRepairTypesForEmployeeQuery, (Result,
     Domain.Entities.Basic.AllowedRepairTypesForEmployee?)>
 {
-    public GetAllowedRepairTypesForEmployeeHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.AllowedRepairTypesForEmployee?)> Handle(
         GetAllowedRepairTypesForEmployeeQuery request, CancellationToken cancellationToken)
     {
@@ -46,10 +42,6 @@ public class GetAllowedRepairTypesForEmployeeHandler : IRequestHandler<GetAllowe
 public class GetAllAllowedRepairTypesForEmployeeHandler : IRequestHandler<GetAllAllowedRepairTypesForEmployeeQuery,
     (Result, IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>?)>
 {
-    public GetAllAllowedRepairTypesForEmployeeHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.AllowedRepairTypesForEmployee>?)> Handle(
         GetAllAllowedRepairTypesForEmployeeQuery request,
         CancellationToken cancellationToken)

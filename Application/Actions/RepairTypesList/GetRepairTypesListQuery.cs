@@ -22,10 +22,6 @@ public class
     GetRepairTypesListHandler : IRequestHandler<GetRepairTypesListQuery, (Result, Domain.Entities.Basic.RepairTypesList?
     )>
 {
-    public GetRepairTypesListHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.RepairTypesList?)> Handle(GetRepairTypesListQuery request,
         CancellationToken cancellationToken)
     {
@@ -44,10 +40,6 @@ public class
 public class GetAllRepairTypesListsHandler : IRequestHandler<GetAllRepairTypesListsQuery,
     (Result, IEnumerable<Domain.Entities.Basic.RepairTypesList>?)>
 {
-    public GetAllRepairTypesListsHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.RepairTypesList>?)> Handle(GetAllRepairTypesListsQuery request,
         CancellationToken cancellationToken)
     {

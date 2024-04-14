@@ -20,10 +20,6 @@ public class GetAllDbUsersQuery : IRequest<(Result, IEnumerable<Domain.Entities.
 
 public class GetDbUserHandler : IRequestHandler<GetDbUserQuery, (Result, Domain.Entities.Basic.DbUser?)>
 {
-    public GetDbUserHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.DbUser?)> Handle(GetDbUserQuery request,
         CancellationToken cancellationToken)
     {
@@ -42,10 +38,6 @@ public class GetDbUserHandler : IRequestHandler<GetDbUserQuery, (Result, Domain.
 public class
     GetAllDbUsersHandler : IRequestHandler<GetAllDbUsersQuery, (Result, IEnumerable<Domain.Entities.Basic.DbUser>?)>
 {
-    public GetAllDbUsersHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.DbUser>?)> Handle(GetAllDbUsersQuery request,
         CancellationToken cancellationToken)
     {

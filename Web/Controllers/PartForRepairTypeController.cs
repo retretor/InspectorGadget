@@ -14,8 +14,6 @@ namespace Web.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-
-// TODO: Add roles to the endpoints
 public class PartForRepairTypeController : ControllerBase
 {
     private readonly IMediator _mediator;

@@ -14,8 +14,6 @@ namespace Web.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-
-// TODO: Add roles to the endpoints
 public class RepairRequestController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -42,7 +40,7 @@ public class RepairRequestController : ControllerBase
     }
 
     [HttpGet]
-    [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
     public async Task<IActionResult> GetAll([FromQuery] GetAllRepairRequestsQuery command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -76,6 +74,7 @@ public class RepairRequestController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id }, id);
     }
 
+    // TODO: maybe delete {id} from route
     [HttpPut("{id}")]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
     public async Task<IActionResult> Update([FromQuery] UpdateRepairRequestCommand command)
@@ -103,5 +102,81 @@ public class RepairRequestController : ControllerBase
 
         var result = await _mediator.Send(new DeleteRepairRequestCommand { Id = id, DbContext = dbContext });
         return result.Succeeded ? Ok() : BadRequest(result);
+    }
+
+
+    [HttpPut("ChangeStatus")]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
+    public async Task<IActionResult> ChangeStatus([FromQuery] ChangeRepairRequestStatusCommand command)
+    {
+        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
+        if (dbContext == null)
+        {
+            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
+        }
+
+        command.DbContext = dbContext;
+        var (result, succeed) = await _mediator.Send(command);
+        return result.Succeeded ? Ok(succeed) : BadRequest(result);
+    }
+
+    [HttpGet("CalculateRepairCost")]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST })]
+    public async Task<IActionResult> CalculateRepairCost(int id)
+    {
+        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
+        if (dbContext == null)
+        {
+            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
+        }
+
+        var (result, cost) = await _mediator.Send(new CalculateRepairRequestCostQuery
+            { EntityId = id, DbContext = dbContext });
+        return result.Succeeded ? Ok(cost) : BadRequest(result);
+    }
+
+    [HttpGet("CalculateRepairTime")]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST })]
+    public async Task<IActionResult> CalculateRepairTime(int id)
+    {
+        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
+        if (dbContext == null)
+        {
+            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
+        }
+
+        var (result, cost) = await _mediator.Send(new CalculateRepairRequestTimeQuery
+            { EntityId = id, DbContext = dbContext });
+        return result.Succeeded ? Ok(cost) : BadRequest(result);
+    }
+
+    [HttpGet("IsAvailableAllParts")]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
+    public async Task<IActionResult> IsAvailableAllParts(int id)
+    {
+        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
+        if (dbContext == null)
+        {
+            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
+        }
+
+        var (result, succeed) = await _mediator.Send(new IsAvailableAllPartsForRepairRequestQuery
+            { EntityId = id, DbContext = dbContext });
+        return result.Succeeded ? Ok(succeed) : BadRequest(result);
+    }
+
+    [HttpGet("GetRequestInfo")]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST })]
+    public async Task<IActionResult> GetRequestInfo(int id)
+    {
+        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
+        if (dbContext == null)
+        {
+            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
+        }
+
+        var (result, info) = await _mediator.Send(new GetRepairRequestInfoQuery
+            { EntityId = id, DbContext = dbContext });
+        return result.Succeeded ? Ok(info) : BadRequest(result);
     }
 }

@@ -3,13 +3,15 @@ using Application.Actions.Authorization.AuthorizeByToken;
 using Application.Actions.Authorization.ChangePassword;
 using Application.Actions.Authorization.RemindLogin;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers;
 
+[Authorize]
+[AllowAnonymous]
 [ApiController]
 [Route("api/auth")]
-// TODO: add roles to the endpoints
 public class AuthorizationController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -24,12 +26,7 @@ public class AuthorizationController : ControllerBase
     {
         var (result, response) = await _mediator.Send(request);
 
-        if (result.Succeeded == false)
-        {
-            return BadRequest(result);
-        }
-
-        return Ok(response);
+        return result.Succeeded == false ? BadRequest(result) : Ok(response);
     }
 
     [HttpGet("token")]
@@ -37,12 +34,7 @@ public class AuthorizationController : ControllerBase
     {
         var (result, response) = await _mediator.Send(request);
 
-        if (result.Succeeded == false)
-        {
-            return BadRequest(result);
-        }
-
-        return Ok(response);
+        return result.Succeeded == false ? BadRequest(result) : Ok(response);
     }
 
     [HttpGet("remind-login")]
@@ -50,12 +42,7 @@ public class AuthorizationController : ControllerBase
     {
         var (result, response) = await _mediator.Send(request);
 
-        if (result.Succeeded == false)
-        {
-            return BadRequest(result);
-        }
-
-        return Ok(response);
+        return result.Succeeded == false ? BadRequest(result) : Ok(response);
     }
 
     [HttpGet("change-password")]
@@ -63,11 +50,6 @@ public class AuthorizationController : ControllerBase
     {
         var (result, response) = await _mediator.Send(request);
 
-        if (result.Succeeded == false)
-        {
-            return BadRequest(result);
-        }
-
-        return Ok(response);
+        return result.Succeeded == false ? BadRequest(result) : Ok(response);
     }
 }

@@ -14,8 +14,6 @@ namespace Web.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-
-// TODO: Add roles to the endpoints
 public class RequestStatusHistoryController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -43,7 +41,7 @@ public class RequestStatusHistoryController : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.RECEPTIONIST })]
     public async Task<IActionResult> GetAll([FromQuery] GetAllRequestStatusHistoriesQuery command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -58,7 +56,7 @@ public class RequestStatusHistoryController : ControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Create([FromQuery] CreateRequestStatusHistoryCommand command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));

@@ -20,10 +20,6 @@ public class CreateClientCommand : IRequest<(Result, int?)>
 
 public class CreateClientHandler : IRequestHandler<CreateClientCommand, (Result, int?)>
 {
-    public CreateClientHandler()
-    {
-    }
-
     public async Task<(Result, int?)> Handle(CreateClientCommand request, CancellationToken cancellationToken)
     {
         if (request.DbContext == null)
@@ -31,6 +27,7 @@ public class CreateClientHandler : IRequestHandler<CreateClientCommand, (Result,
             return (Result.Failure(new InvalidDbContextException()), null);
         }
 
+        // TODO: change returning type to Client
         var dbUserId = await Task.Run(() => request.DbContext.CreateClient(request.FirstName, request.SecondName,
             request.TelephoneNumber, request.DiscountPercentage, request.Login, request.PasswordHash,
             request.SecretKey).SingleOrDefault(), cancellationToken);
@@ -39,7 +36,7 @@ public class CreateClientHandler : IRequestHandler<CreateClientCommand, (Result,
             return (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), 0)), null);
         }
 
-        return (Result.Success(), dbUserId.ClientId);
+        return (Result.Success(), dbUserId.Result);
     }
 }
 

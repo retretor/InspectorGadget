@@ -14,10 +14,6 @@ public class DeleteRepairTypesListCommand : IRequest<Result>
 
 public class DeleteRepairTypesListHandler : IRequestHandler<DeleteRepairTypesListCommand, Result>
 {
-    public DeleteRepairTypesListHandler()
-    {
-    }
-
     public async Task<Result> Handle(DeleteRepairTypesListCommand request, CancellationToken cancellationToken)
     {
         if (request.DbContext == null)

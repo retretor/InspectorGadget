@@ -27,13 +27,32 @@ public class AuthorizationService : IAuthorizationService
     {
         var (result, dbUser) = await _identityService.AuthenticateUser(request.Login, request.Password);
 
-        if (result.Succeeded == false)
-        {
-            return (result, null);
-        }
+        if (result.Succeeded == false) return (result, null);
 
         var response = GenerateResponse(dbUser);
         return (result, response);
+    }
+
+    public async Task<(Result, AuthorizeResponse?)> ChangePassword(ChangePasswordQuery request)
+    {
+        var (result, dbUser) =
+            await _identityService.ChangePassword(request.Login, request.OldPasswordHash, request.NewPasswordHash);
+
+        if (result.Succeeded == false) return (result, null);
+
+        var response = GenerateResponse(dbUser);
+        return (result, response);
+    }
+
+    public async Task<(Result, string?)> RemindLogin(RemindLoginQuery request)
+    {
+        var (result, dbUser) = await _identityService.GetUserByTelephone(request.TelephoneNumber, request.SecretKey);
+
+        if (result.Succeeded == false) return (result, null);
+
+        return dbUser == null
+            ? (Result.Failure(new NotFoundException(nameof(DbUser), request.TelephoneNumber)), null)
+            : (result, dbUser.Login);
     }
 
     public async Task<(Result, AuthorizeResponse?)> AuthorizeByToken(AuthorizeByTokenQuery request)
@@ -52,53 +71,15 @@ public class AuthorizationService : IAuthorizationService
         var validTo = jwtToken.ValidTo;
         var user = await _identityService.GetUserByLogin(userLoginClaim.Value);
 
-        if (user == null)
-        {
-            return (Result.Failure(new List<ResultError> { new(ResultErrorEnum.UserNotFound) }), null);
-        }
-
-        return (Result.Success(), GenerateResponse(user, validTo));
-    }
-
-    public async Task<(Result, AuthorizeResponse?)> ChangePassword(ChangePasswordQuery request)
-    {
-        var (result, dbUser) = await _identityService.AuthenticateUser(request.Login, request.OldPasswordHash);
-
-        if (result.Succeeded == false)
-        {
-            return (result, null);
-        }
-
-        (result, dbUser) = await _identityService.ChangePassword(dbUser, request.NewPasswordHash);
-
-        if (result.Succeeded == false)
-        {
-            return (result, null);
-        }
-
-        var response = GenerateResponse(dbUser);
-
-        return (result, response);
-    }
-
-    public async Task<(Result, string?)> RemindLogin(RemindLoginQuery request)
-    {
-        var (result, dbUser) = await _identityService.GetUserByTelephone(request.TelephoneNumber, request.SecretKey);
-
-        if (result.Succeeded == false)
-        {
-            return (result, null);
-        }
-
-        return dbUser == null
-            ? (Result.Failure(new NotFoundException(nameof(DbUser), request.TelephoneNumber)), null)
-            : (result, dbUser.Login);
+        return user == null
+            ? (Result.Failure(new List<ResultError> { new(ResultErrorEnum.UserNotFound) }), null)
+            : (Result.Success(), GenerateResponse(user, validTo));
     }
 
     private AuthorizeResponse? GenerateResponse(DbUser? dbUser, DateTime? validTo = null)
     {
         if (dbUser == null) return null;
         var token = _jwtService.GenerateToken(dbUser, validTo);
-        return new AuthorizeResponse(token, dbUser);
+        return new AuthorizeResponse(token);
     }
 }

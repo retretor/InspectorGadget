@@ -47,7 +47,7 @@ public class CreateEmployeeHandler : IRequestHandler<CreateEmployeeCommand, (Res
             return (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), 0)), null);
         }
 
-        return (Result.Success(), dbUserId.EmployeeId);
+        return (Result.Success(), dbUserId.Result);
     }
 }
 

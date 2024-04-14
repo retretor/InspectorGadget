@@ -14,8 +14,6 @@ namespace Web.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-
-// TODO: Add roles to the endpoints
 public class RepairTypesListController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -28,7 +26,7 @@ public class RepairTypesListController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST })]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
     public async Task<IActionResult> Get(int id)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -42,7 +40,7 @@ public class RepairTypesListController : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
     public async Task<IActionResult> GetAll([FromQuery] GetAllRepairTypesListsQuery command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -57,7 +55,7 @@ public class RepairTypesListController : ControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.MASTER })]
     public async Task<IActionResult> Create([FromQuery] CreateRepairTypesListCommand command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -77,7 +75,7 @@ public class RepairTypesListController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.MASTER })]
     public async Task<IActionResult> Update([FromQuery] UpdateRepairTypesListCommand command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -92,7 +90,7 @@ public class RepairTypesListController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.MASTER })]
     public async Task<IActionResult> Delete(int id)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));

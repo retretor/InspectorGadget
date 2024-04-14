@@ -20,10 +20,6 @@ public class GetAllEmployeesQuery : IRequest<(Result, IEnumerable<Domain.Entitie
 
 public class GetEmployeeHandler : IRequestHandler<GetEmployeeQuery, (Result, Domain.Entities.Basic.Employee?)>
 {
-    public GetEmployeeHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.Employee?)> Handle(GetEmployeeQuery request,
         CancellationToken cancellationToken)
     {
@@ -43,10 +39,6 @@ public class
     GetAllEmployeesHandler : IRequestHandler<GetAllEmployeesQuery, (Result, IEnumerable<Domain.Entities.Basic.Employee>?
     )>
 {
-    public GetAllEmployeesHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.Employee>?)> Handle(GetAllEmployeesQuery request,
         CancellationToken cancellationToken)
     {

@@ -22,10 +22,6 @@ public class
 public class GetRequestStatusHistoryHandler : IRequestHandler<GetRequestStatusHistoryQuery, (Result,
     Domain.Entities.Basic.RequestStatusHistory?)>
 {
-    public GetRequestStatusHistoryHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.RequestStatusHistory?)> Handle(
         GetRequestStatusHistoryQuery request, CancellationToken cancellationToken)
     {
@@ -45,10 +41,6 @@ public class GetRequestStatusHistoryHandler : IRequestHandler<GetRequestStatusHi
 public class GetAllRequestStatusHistoriesHandler : IRequestHandler<GetAllRequestStatusHistoriesQuery,
     (Result, IEnumerable<Domain.Entities.Basic.RequestStatusHistory>?)>
 {
-    public GetAllRequestStatusHistoriesHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.RequestStatusHistory>?)> Handle(
         GetAllRequestStatusHistoriesQuery request,
         CancellationToken cancellationToken)

@@ -20,10 +20,6 @@ public class GetAllClientsQuery : IRequest<(Result, IEnumerable<Domain.Entities.
 
 public class GetClientHandler : IRequestHandler<GetClientQuery, (Result, Domain.Entities.Basic.Client?)>
 {
-    public GetClientHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.Client?)> Handle(GetClientQuery request,
         CancellationToken cancellationToken)
     {
@@ -46,10 +42,6 @@ public class GetClientHandler : IRequestHandler<GetClientQuery, (Result, Domain.
 public class
     GetAllClientsHandler : IRequestHandler<GetAllClientsQuery, (Result, IEnumerable<Domain.Entities.Basic.Client>?)>
 {
-    public GetAllClientsHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.Client>?)> Handle(GetAllClientsQuery request,
         CancellationToken cancellationToken)
     {

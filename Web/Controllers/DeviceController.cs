@@ -15,7 +15,7 @@ namespace Web.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 
-// TODO: Add roles to the endpoints
+// TODO: maybe move dbContext logic to a DbContextMiddleware or AuthenticationBehavior
 public class DeviceController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -42,7 +42,7 @@ public class DeviceController : ControllerBase
     }
 
     [HttpGet]
-    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll([FromQuery] GetAllDevicesQuery command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -57,7 +57,7 @@ public class DeviceController : ControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Create([FromQuery] CreateDeviceCommand command)
     {
         var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
@@ -103,5 +103,21 @@ public class DeviceController : ControllerBase
 
         var result = await _mediator.Send(new DeleteDeviceCommand { Id = id, DbContext = dbContext });
         return result.Succeeded ? Ok() : BadRequest(result);
+    }
+
+    // GetRepairTypesInfo
+    [HttpGet("RepairTypesInfo")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetRepairTypesInfo(int id)
+    {
+        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
+        if (dbContext == null)
+        {
+            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
+        }
+
+        var (result, entity) = await _mediator.Send(new GetRepairTypesInfoForDeviceQuery
+            { EntityId = id, DbContext = dbContext });
+        return result.Succeeded ? Ok(entity) : BadRequest(result);
     }
 }

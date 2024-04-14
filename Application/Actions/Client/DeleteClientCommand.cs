@@ -14,10 +14,6 @@ public class DeleteClientCommand : IRequest<Result>
 
 public class DeleteClientHandler : IRequestHandler<DeleteClientCommand, Result>
 {
-    public DeleteClientHandler()
-    {
-    }
-
     public async Task<Result> Handle(DeleteClientCommand request, CancellationToken cancellationToken)
     {
         if (request.DbContext == null)

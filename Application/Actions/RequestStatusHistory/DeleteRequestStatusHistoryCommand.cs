@@ -14,10 +14,6 @@ public class DeleteRequestStatusHistoryCommand : IRequest<Result>
 
 public class DeleteRequestStatusHistoryHandler : IRequestHandler<DeleteRequestStatusHistoryCommand, Result>
 {
-    public DeleteRequestStatusHistoryHandler()
-    {
-    }
-
     public async Task<Result> Handle(DeleteRequestStatusHistoryCommand request, CancellationToken cancellationToken)
     {
         if (request.DbContext == null)

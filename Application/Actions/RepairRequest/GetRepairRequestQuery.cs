@@ -21,9 +21,7 @@ public class GetAllRepairRequestsQuery : IRequest<(Result, IEnumerable<Domain.En
 public class
     GetRepairRequestHandler : IRequestHandler<GetRepairRequestQuery, (Result, Domain.Entities.Basic.RepairRequest?)>
 {
-    public GetRepairRequestHandler()
-    {
-    }
+    // TODO: delete constructor if not needed
 
     public async Task<(Result, Domain.Entities.Basic.RepairRequest?)> Handle(GetRepairRequestQuery request,
         CancellationToken cancellationToken)
@@ -43,10 +41,6 @@ public class
 public class GetAllRepairRequestsHandler : IRequestHandler<GetAllRepairRequestsQuery,
     (Result, IEnumerable<Domain.Entities.Basic.RepairRequest>?)>
 {
-    public GetAllRepairRequestsHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.RepairRequest>?)> Handle(
         GetAllRepairRequestsQuery request,
         CancellationToken cancellationToken)

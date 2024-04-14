@@ -20,10 +20,6 @@ public class GetAllDevicesQuery : IRequest<(Result, IEnumerable<Domain.Entities.
 
 public class GetDeviceHandler : IRequestHandler<GetDeviceQuery, (Result, Domain.Entities.Basic.Device?)>
 {
-    public GetDeviceHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.Device?)> Handle(GetDeviceQuery request,
         CancellationToken cancellationToken)
     {
@@ -42,10 +38,6 @@ public class GetDeviceHandler : IRequestHandler<GetDeviceQuery, (Result, Domain.
 public class
     GetAllDevicesHandler : IRequestHandler<GetAllDevicesQuery, (Result, IEnumerable<Domain.Entities.Basic.Device>?)>
 {
-    public GetAllDevicesHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.Device>?)> Handle(GetAllDevicesQuery request,
         CancellationToken cancellationToken)
     {

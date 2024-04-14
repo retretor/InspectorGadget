@@ -15,10 +15,6 @@ public class DeleteAllowedRepairTypesForEmployeeCommand : IRequest<Result>
 public class
     DeleteAllowedRepairTypesForEmployeeHandler : IRequestHandler<DeleteAllowedRepairTypesForEmployeeCommand, Result>
 {
-    public DeleteAllowedRepairTypesForEmployeeHandler()
-    {
-    }
-
     public async Task<Result> Handle(DeleteAllowedRepairTypesForEmployeeCommand request,
         CancellationToken cancellationToken)
     {

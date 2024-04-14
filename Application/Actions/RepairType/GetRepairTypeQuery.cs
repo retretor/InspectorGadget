@@ -20,10 +20,6 @@ public class GetAllRepairTypesQuery : IRequest<(Result, IEnumerable<Domain.Entit
 
 public class GetRepairTypeHandler : IRequestHandler<GetRepairTypeQuery, (Result, Domain.Entities.Basic.RepairType?)>
 {
-    public GetRepairTypeHandler()
-    {
-    }
-
     public async Task<(Result, Domain.Entities.Basic.RepairType?)> Handle(GetRepairTypeQuery request,
         CancellationToken cancellationToken)
     {
@@ -43,10 +39,6 @@ public class
     GetAllRepairTypesHandler : IRequestHandler<GetAllRepairTypesQuery, (Result,
     IEnumerable<Domain.Entities.Basic.RepairType>?)>
 {
-    public GetAllRepairTypesHandler()
-    {
-    }
-
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.RepairType>?)> Handle(GetAllRepairTypesQuery request,
         CancellationToken cancellationToken)
     {
