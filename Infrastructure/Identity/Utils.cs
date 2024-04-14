@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Domain.Enums;
 
-namespace Web.Identity;
+namespace Infrastructure.Identity;
 
 public static class Utils
 {

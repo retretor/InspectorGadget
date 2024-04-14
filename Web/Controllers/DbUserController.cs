@@ -1,8 +1,5 @@
 ﻿using System.Security.Claims;
 using Application.Actions.DbUser;
-using Application.Common.Exceptions;
-using Application.Common.Interfaces;
-using Application.Common.Models;
 using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,25 +14,17 @@ namespace Web.Controllers;
 public class DbUserController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IAppDbContextProvider _dbContextProvider;
 
-    public DbUserController(IMediator mediator, IAppDbContextProvider dbContextProvider)
+    public DbUserController(IMediator mediator)
     {
         _mediator = mediator;
-        _dbContextProvider = dbContextProvider;
     }
 
     [HttpGet("{id}")]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Get(int id)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        var (result, entity) = await _mediator.Send(new GetDbUserQuery { Id = id, DbContext = dbContext });
+        var (result, entity) = await _mediator.Send(new GetDbUserQuery { Id = id });
         return result.Succeeded ? Ok(entity) : BadRequest(result);
     }
 
@@ -43,28 +32,14 @@ public class DbUserController : ControllerBase
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> GetAll([FromQuery] GetAllDbUsersQuery command)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        command.DbContext = dbContext;
         var (result, entities) = await _mediator.Send(command);
         return result.Succeeded ? Ok(entities) : BadRequest(result);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Update([FromQuery] UpdateDbUserCommand command)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        command.DbContext = dbContext;
         var result = await _mediator.Send(command);
         return result.Succeeded ? Ok() : BadRequest(result);
     }
@@ -73,13 +48,7 @@ public class DbUserController : ControllerBase
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Delete(int id)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-        
-        var result = await _mediator.Send(new DeleteDbUserCommand { Id = id, DbContext = dbContext });
+        var result = await _mediator.Send(new DeleteDbUserCommand { Id = id });
         return result.Succeeded ? Ok() : BadRequest(result);
     }
 }

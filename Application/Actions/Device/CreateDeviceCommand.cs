@@ -15,28 +15,19 @@ public class CreateDeviceCommand : IRequest<(Result, int?)>
     public string Brand { get; init; } = null!;
     public string Series { get; init; } = null!;
     public string Manufacturer { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreateDeviceHandler : IRequestHandler<CreateDeviceCommand, (Result, int?)>
+public class CreateDeviceHandler : BaseHandler, IRequestHandler<CreateDeviceCommand, (Result, int?)>
 {
-    private readonly IMapper _mapper;
-
-    public CreateDeviceHandler(IMapper mapper)
+    public CreateDeviceHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<(Result, int?)> Handle(CreateDeviceCommand request, CancellationToken cancellationToken)
     {
-        var entity = _mapper.Map<Domain.Entities.Basic.Device>(request);
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        request.DbContext.Devices.Add(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        var entity = Mapper!.Map<Domain.Entities.Basic.Device>(request);
+        DbContext.Devices.Add(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
         return (Result.Success(), entity.EntityId);
     }
 }

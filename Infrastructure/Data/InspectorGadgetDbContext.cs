@@ -147,22 +147,6 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
         if (returnType != null) modelBuilder.Entity(returnType).HasNoKey();
     }
 
-    // private static void RegisterFunctions(ModelBuilder modelBuilder)
-    // {
-    //     var methodInfos = typeof(InspectorGadgetDbContext).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-    //         .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(IQueryable<>));
-    //
-    //     foreach (var method in methodInfos)
-    //     {
-    //         var returnType = method.ReturnType.GenericTypeArguments[0];
-    //         var functionName = ConvertToSnakeCase(method.Name);
-    //
-    //         modelBuilder.HasDbFunction(method)
-    //             .HasName(functionName);
-    //         modelBuilder.Entity(returnType).HasNoKey();
-    //     }
-    // }
-
     private static string ConvertToSnakeCase(string input)
     {
         if (string.IsNullOrEmpty(input)) return input;

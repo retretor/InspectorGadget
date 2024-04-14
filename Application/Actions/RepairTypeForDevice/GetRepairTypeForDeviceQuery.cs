@@ -10,27 +10,24 @@ namespace Application.Actions.RepairTypeForDevice;
 public class GetRepairTypeForDeviceQuery : IRequest<(Result, Domain.Entities.Basic.RepairTypeForDevice?)>
 {
     public int Id { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
 public class
     GetAllRepairTypeForDevicesQuery : IRequest<(Result, IEnumerable<Domain.Entities.Basic.RepairTypeForDevice>?)>
 {
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class GetRepairTypeForDeviceHandler : IRequestHandler<GetRepairTypeForDeviceQuery, (Result,
+public class GetRepairTypeForDeviceHandler : BaseHandler, IRequestHandler<GetRepairTypeForDeviceQuery, (Result,
     Domain.Entities.Basic.RepairTypeForDevice?)>
 {
+    public GetRepairTypeForDeviceHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, Domain.Entities.Basic.RepairTypeForDevice?)> Handle(GetRepairTypeForDeviceQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        var entity = await request.DbContext.RepairTypeForDevices.FindAsync(request.Id);
+        var entity = await DbContext.RepairTypeForDevices.FindAsync(request.Id);
         return entity == null
             ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairTypeForDevice), request.Id)),
                 null)
@@ -38,18 +35,18 @@ public class GetRepairTypeForDeviceHandler : IRequestHandler<GetRepairTypeForDev
     }
 }
 
-public class GetAllRepairTypeForDevicesHandler : IRequestHandler<GetAllRepairTypeForDevicesQuery,
+public class GetAllRepairTypeForDevicesHandler : BaseHandler, IRequestHandler<GetAllRepairTypeForDevicesQuery,
     (Result, IEnumerable<Domain.Entities.Basic.RepairTypeForDevice>?)>
 {
+    public GetAllRepairTypeForDevicesHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.RepairTypeForDevice>?)> Handle(
         GetAllRepairTypeForDevicesQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-        var entities = await request.DbContext.RepairTypeForDevices.ToListAsync(cancellationToken);
+        var entities = await DbContext.RepairTypeForDevices.ToListAsync(cancellationToken);
         return (Result.Success(), entities);
     }
 }

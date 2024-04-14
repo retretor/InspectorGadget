@@ -12,29 +12,21 @@ public class CreatePartForRepairTypeCommand : IRequest<(Result, int?)>
     public int PartCount { get; init; }
     public int RepairTypeForDeviceId { get; init; }
     public int RepairPartId { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreatePartForRepairTypeHandler : IRequestHandler<CreatePartForRepairTypeCommand, (Result, int?)>
+public class CreatePartForRepairTypeHandler : BaseHandler,
+    IRequestHandler<CreatePartForRepairTypeCommand, (Result, int?)>
 {
-    private readonly IMapper _mapper;
-
-    public CreatePartForRepairTypeHandler(IMapper mapper)
+    public CreatePartForRepairTypeHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<(Result, int?)> Handle(CreatePartForRepairTypeCommand request,
         CancellationToken cancellationToken)
     {
-        var entity = _mapper.Map<Domain.Entities.Basic.PartForRepairType>(request);
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        request.DbContext.PartForRepairTypes.Add(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        var entity = Mapper!.Map<Domain.Entities.Basic.PartForRepairType>(request);
+        DbContext.PartForRepairTypes.Add(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
         return (Result.Success(), entity.EntityId);
     }
 }

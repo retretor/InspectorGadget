@@ -14,27 +14,20 @@ public class ChangeRepairRequestStatusCommand : IRequest<(Result, bool)>
     public int EntityId { get; init; }
     public string Status { get; init; } = string.Empty;
     public DateTime Date { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class ChangeRepairRequestStatusHandler : IRequestHandler<ChangeRepairRequestStatusCommand, (Result, bool)>
+public class ChangeRepairRequestStatusHandler : BaseHandler,
+    IRequestHandler<ChangeRepairRequestStatusCommand, (Result, bool)>
 {
-    private readonly IMapper _mapper;
-
-    public ChangeRepairRequestStatusHandler(IMapper mapper)
+    public ChangeRepairRequestStatusHandler(IApplicationDbContext dbContext) : base(dbContext)
     {
-        _mapper = mapper;
     }
 
-    public async Task<(Result, bool)> Handle(ChangeRepairRequestStatusCommand request, CancellationToken cancellationToken)
+    public async Task<(Result, bool)> Handle(ChangeRepairRequestStatusCommand request,
+        CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), false);
-        }
-
         var entity = await Task.Run(() =>
-            request.DbContext.ChangeRepairRequestStatus(request.EntityId, request.Status, request.Date)
+            DbContext.ChangeRepairRequestStatus(request.EntityId, request.Status, request.Date)
                 .SingleOrDefaultAsync());
 
         return entity == null

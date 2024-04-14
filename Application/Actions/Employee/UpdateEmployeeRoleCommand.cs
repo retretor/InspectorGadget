@@ -12,20 +12,18 @@ public class UpdateEmployeeRoleCommand : IRequest<Result>
 {
     public int EntityId { get; init; }
     public string Role { get; set; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class UpdateEmployeeRoleHandler : IRequestHandler<UpdateEmployeeRoleCommand, Result>
+public class UpdateEmployeeRoleHandler : BaseHandler, IRequestHandler<UpdateEmployeeRoleCommand, Result>
 {
+    public UpdateEmployeeRoleHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<Result> Handle(UpdateEmployeeRoleCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
         await Task.Run(() =>
-            request.DbContext.UpdateEmployeeRole(request.EntityId, request.Role).SingleOrDefaultAsync());
+            DbContext.UpdateEmployeeRole(request.EntityId, request.Role).SingleOrDefaultAsync());
 
         return Result.Success();
     }

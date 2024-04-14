@@ -11,27 +11,19 @@ public class CreateRepairTypesListCommand : IRequest<(Result, int?)>
 {
     public int RepairTypeForDeviceId { get; init; }
     public int RepairRequestId { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreateRepairTypesListHandler : IRequestHandler<CreateRepairTypesListCommand, (Result, int?)>
+public class CreateRepairTypesListHandler : BaseHandler, IRequestHandler<CreateRepairTypesListCommand, (Result, int?)>
 {
-    private readonly IMapper _mapper;
-
-    public CreateRepairTypesListHandler(IMapper mapper)
+    public CreateRepairTypesListHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<(Result, int?)> Handle(CreateRepairTypesListCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-        var entity = _mapper.Map<Domain.Entities.Basic.RepairTypesList>(request);
-        request.DbContext.RepairTypesLists.Add(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        var entity = Mapper!.Map<Domain.Entities.Basic.RepairTypesList>(request);
+        DbContext.RepairTypesLists.Add(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
         return (Result.Success(), entity.EntityId);
     }
 }

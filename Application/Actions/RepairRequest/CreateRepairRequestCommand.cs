@@ -14,28 +14,19 @@ public class CreateRepairRequestCommand : IRequest<(Result, int?)>
     public int EmployeeId { get; init; }
     public string SerialNumber { get; init; } = null!;
     public string Description { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreateRepairRequestHandler : IRequestHandler<CreateRepairRequestCommand, (Result, int?)>
+public class CreateRepairRequestHandler : BaseHandler, IRequestHandler<CreateRepairRequestCommand, (Result, int?)>
 {
-    private readonly IMapper _mapper;
-
-    public CreateRepairRequestHandler(IMapper mapper)
+    public CreateRepairRequestHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<(Result, int?)> Handle(CreateRepairRequestCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        var entity = _mapper.Map<Domain.Entities.Basic.RepairRequest>(request);
-        request.DbContext.RepairRequests.Add(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        var entity = Mapper!.Map<Domain.Entities.Basic.RepairRequest>(request);
+        DbContext.RepairRequests.Add(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
         return (Result.Success(), entity.EntityId);
     }
 }

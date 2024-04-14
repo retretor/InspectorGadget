@@ -12,35 +12,28 @@ public class UpdateAllowedRepairTypesForEmployeeCommand : IRequest<Result>
     public int EntityId { get; init; }
     public int EmployeeId { get; init; }
     public int RepairTypeId { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
 public class
-    UpdateAllowedRepairTypesForEmployeeHandler : IRequestHandler<UpdateAllowedRepairTypesForEmployeeCommand, Result>
+    UpdateAllowedRepairTypesForEmployeeHandler : BaseHandler,
+    IRequestHandler<UpdateAllowedRepairTypesForEmployeeCommand, Result>
 {
-    private readonly IMapper _mapper;
-
-    public UpdateAllowedRepairTypesForEmployeeHandler(IMapper mapper)
+    public UpdateAllowedRepairTypesForEmployeeHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext,
+        mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<Result> Handle(UpdateAllowedRepairTypesForEmployeeCommand request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.AllowedRepairTypesForEmployees.FindAsync(request.EntityId);
+        var entity = await DbContext.AllowedRepairTypesForEmployees.FindAsync(request.EntityId);
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(AllowedRepairTypesForEmployee), request.EntityId));
         }
 
-        _mapper.Map(request, entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        Mapper!.Map(request, entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

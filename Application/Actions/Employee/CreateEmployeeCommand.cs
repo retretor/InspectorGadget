@@ -20,34 +20,22 @@ public class CreateEmployeeCommand : IRequest<(Result, int?)>
     public string PasswordHash { get; set; } = null!;
     public string SecretKey { get; set; } = null!;
     public string Role { get; set; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreateEmployeeHandler : IRequestHandler<CreateEmployeeCommand, (Result, int?)>
+public class CreateEmployeeHandler : BaseHandler, IRequestHandler<CreateEmployeeCommand, (Result, int?)>
 {
-    private readonly IMapper _mapper;
-
-    public CreateEmployeeHandler(IMapper mapper)
+    public CreateEmployeeHandler(IApplicationDbContext dbContext) : base(dbContext)
     {
-        _mapper = mapper;
     }
 
     public async Task<(Result, int?)> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        var dbUserId = await Task.Run(() => request.DbContext.CreateEmployee(request.FirstName, request.SecondName,
+        var dbUserId = await Task.Run(() => DbContext.CreateEmployee(request.FirstName, request.SecondName,
             request.TelephoneNumber, request.ExperienceYears, request.YearsInCompany, request.Rating, request.Login,
             request.PasswordHash, request.SecretKey, request.Role).SingleOrDefault(), cancellationToken);
-        if (dbUserId == null)
-        {
-            return (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), 0)), null);
-        }
-
-        return (Result.Success(), dbUserId.Result);
+        return dbUserId == null
+            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), 0)), null)
+            : (Result.Success(), dbUserId.Result);
     }
 }
 

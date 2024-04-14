@@ -9,26 +9,25 @@ namespace Application.Actions.RepairTypesList;
 public class DeleteRepairTypesListCommand : IRequest<Result>
 {
     public int Id { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class DeleteRepairTypesListHandler : IRequestHandler<DeleteRepairTypesListCommand, Result>
+public class DeleteRepairTypesListHandler : BaseHandler, IRequestHandler<DeleteRepairTypesListCommand, Result>
 {
+    public DeleteRepairTypesListHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<Result> Handle(DeleteRepairTypesListCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-        var entity = await request.DbContext.RepairTypesLists.FindAsync(request.Id);
+        var entity = await DbContext.RepairTypesLists.FindAsync(request.Id);
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(RepairTypesList), request.Id));
         }
 
-        request.DbContext.RepairTypesLists.Remove(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
-        
+        DbContext.RepairTypesLists.Remove(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
+
         return Result.Success();
     }
 }

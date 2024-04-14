@@ -15,34 +15,25 @@ public class UpdateRepairRequestCommand : IRequest<Result>
     public int EmployeeId { get; init; }
     public string SerialNumber { get; init; } = null!;
     public string Description { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class UpdateRepairRequestHandler : IRequestHandler<UpdateRepairRequestCommand, Result>
+public class UpdateRepairRequestHandler : BaseHandler, IRequestHandler<UpdateRepairRequestCommand, Result>
 {
-    private readonly IMapper _mapper;
-
-    public UpdateRepairRequestHandler(IMapper mapper)
+    public UpdateRepairRequestHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<Result> Handle(UpdateRepairRequestCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.RepairRequests.FindAsync(request.EntityId);
+        var entity = await DbContext.RepairRequests.FindAsync(request.EntityId);
 
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(RepairRequest), request.EntityId));
         }
 
-        _mapper.Map(request, entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        Mapper!.Map(request, entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

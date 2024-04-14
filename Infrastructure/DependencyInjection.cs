@@ -1,9 +1,11 @@
 ﻿using System.Text;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Infrastructure.Authorization;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,11 +25,33 @@ public static class DependencyInjection
         var dataSource = dataSourceBuilder.Build();
         services.AddDbContext<InspectorGadgetDbContext>(options => { options.UseNpgsql(dataSource); });
 
-        // var connectionString = configuration.GetConnectionString("DefaultConnection");
-        // services.AddDbContext<InspectorGadgetDbContext>(options => { options.UseNpgsql(connectionString); });
+        // services.AddScoped<IApplicationDbContext, InspectorGadgetDbContext>();
 
-        services.AddScoped<IApplicationDbContext, InspectorGadgetDbContext>();
-        services.AddScoped<IAppDbContextProvider, AppDbContextProvider>();
+        services.AddHttpContextAccessor();
+        // Регистрация DbContext
+        services.AddScoped<IApplicationDbContext>(serviceProvider =>
+        {
+            var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            var user = httpContextAccessor.HttpContext?.User;
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("User is not authenticated");
+            }
+
+            var dbContextProvider = serviceProvider.GetRequiredService<IAppDbContextProvider>();
+            var userRole = Utils.GetUserRole(user);
+            var dbContext = dbContextProvider.GetDbContext(userRole);
+            if (dbContext == null)
+            {
+                throw new InvalidDbContextException();
+            }
+
+            return dbContext;
+        });
+
+
+        services.AddSingleton<IAppDbContextProvider, AppDbContextProvider>();
+        //services.AddScoped<IAppDbContextProvider, AppDbContextProvider>();
 
         // Add authentication
         services.AddAuthentication(x =>

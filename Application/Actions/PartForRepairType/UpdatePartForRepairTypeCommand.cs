@@ -13,34 +13,26 @@ public class UpdatePartForRepairTypeCommand : IRequest<Result>
     public int PartCount { get; init; }
     public int RepairTypeForDeviceId { get; init; }
     public int RepairPartId { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class UpdatePartForRepairTypeHandler : IRequestHandler<UpdatePartForRepairTypeCommand, Result>
+public class UpdatePartForRepairTypeHandler : BaseHandler, IRequestHandler<UpdatePartForRepairTypeCommand, Result>
 {
-    private readonly IMapper _mapper;
-
-    public UpdatePartForRepairTypeHandler(IApplicationDbContext context, IMapper mapper)
+    public UpdatePartForRepairTypeHandler(IApplicationDbContext context, IMapper mapper) : base(context, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<Result> Handle(UpdatePartForRepairTypeCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.PartForRepairTypes.FindAsync(request.EntityId);
+        var entity = await DbContext.PartForRepairTypes.FindAsync(request.EntityId);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.PartForRepairType), request.EntityId));
+            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.PartForRepairType),
+                request.EntityId));
         }
 
-        _mapper.Map(request, entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        Mapper!.Map(request, entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
 }

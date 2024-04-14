@@ -25,7 +25,6 @@ public class AuthorizationController : ControllerBase
     public async Task<IActionResult> Login([FromQuery] AuthorizeByLoginQuery request)
     {
         var (result, response) = await _mediator.Send(request);
-
         return result.Succeeded == false ? BadRequest(result) : Ok(response);
     }
 
@@ -33,7 +32,6 @@ public class AuthorizationController : ControllerBase
     public async Task<IActionResult> Token([FromQuery] AuthorizeByTokenQuery request)
     {
         var (result, response) = await _mediator.Send(request);
-
         return result.Succeeded == false ? BadRequest(result) : Ok(response);
     }
 
@@ -41,7 +39,6 @@ public class AuthorizationController : ControllerBase
     public async Task<IActionResult> RemindLogin([FromQuery] RemindLoginQuery request)
     {
         var (result, response) = await _mediator.Send(request);
-
         return result.Succeeded == false ? BadRequest(result) : Ok(response);
     }
 
@@ -49,7 +46,6 @@ public class AuthorizationController : ControllerBase
     public async Task<IActionResult> ChangePassword([FromQuery] ChangePasswordQuery request)
     {
         var (result, response) = await _mediator.Send(request);
-
         return result.Succeeded == false ? BadRequest(result) : Ok(response);
     }
 }

@@ -11,35 +11,26 @@ public class UpdateRepairTypeCommand : IRequest<Result>
 {
     public int EntityId { get; init; }
     public string Name { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class UpdateRepairTypeHandler : IRequestHandler<UpdateRepairTypeCommand, Result>
+public class UpdateRepairTypeHandler : BaseHandler, IRequestHandler<UpdateRepairTypeCommand, Result>
 {
-    private readonly IMapper _mapper;
-
-    public UpdateRepairTypeHandler(IMapper mapper)
+    public UpdateRepairTypeHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<Result> Handle(UpdateRepairTypeCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.RepairTypes.FindAsync(request.EntityId);
+        var entity = await DbContext.RepairTypes.FindAsync(request.EntityId);
 
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(RepairType), request.EntityId));
         }
 
-        _mapper.Map(request, entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
-        
+        Mapper!.Map(request, entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
+
         return Result.Success();
     }
 }
