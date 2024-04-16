@@ -8,7 +8,6 @@ namespace Infrastructure.Data;
 
 public class AppDbContextProvider : IAppDbContextProvider
 {
-    private readonly Dictionary<Role, IApplicationDbContext> _contexts = new();
     private readonly IConfiguration _configuration;
 
     public AppDbContextProvider(IConfiguration configuration)
@@ -19,8 +18,7 @@ public class AppDbContextProvider : IAppDbContextProvider
 
     public IApplicationDbContext? GetDbContext(Role role)
     {
-        if (_contexts.TryGetValue(role, out var context)) return context;
-
+        Console.WriteLine($"Creating new connection for Role: {role}");
         var connectionString = GetConnectionString(role);
         if (connectionString == null) return null;
 
@@ -30,8 +28,6 @@ public class AppDbContextProvider : IAppDbContextProvider
         var dataSource = dataSourceBuilder.Build();
         var options = new DbContextOptionsBuilder<InspectorGadgetDbContext>().UseNpgsql(dataSource).Options;
         var dbContext = new InspectorGadgetDbContext(options);
-
-        _contexts.Add(role, dbContext);
 
         return dbContext;
     }

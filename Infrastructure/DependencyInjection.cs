@@ -37,6 +37,7 @@ public static class DependencyInjection
             {
                 throw new UnauthorizedAccessException("User is not authenticated");
             }
+            Console.WriteLine("Getting new connection for Role: {0}", Utils.GetUserRole(user));
 
             var dbContextProvider = serviceProvider.GetRequiredService<IAppDbContextProvider>();
             var userRole = Utils.GetUserRole(user);
@@ -76,9 +77,9 @@ public static class DependencyInjection
         });
 
         // Add services
-        services.AddScoped<JwtService>();
-        services.AddScoped<IAuthorizationService, AuthorizationService>();
-        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddSingleton<JwtService>();
+        services.AddSingleton<IAuthorizationService, AuthorizationService>();
+        services.AddSingleton<IIdentityService, IdentityService>();
 
         return services;
     }
