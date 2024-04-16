@@ -16,28 +16,19 @@ public class CreateRepairPartCommand : IRequest<(Result, int?)>
     public int MinAllowedCount { get; init; }
     public float Cost { get; init; }
     public string Condition { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreateRepairPartHandler : IRequestHandler<CreateRepairPartCommand, (Result, int?)>
+public class CreateRepairPartHandler : BaseHandler, IRequestHandler<CreateRepairPartCommand, (Result, int?)>
 {
-    private readonly IMapper _mapper;
-
-    public CreateRepairPartHandler(IMapper mapper)
+    public CreateRepairPartHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<(Result, int?)> Handle(CreateRepairPartCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        var entity = _mapper.Map<Domain.Entities.Basic.RepairPart>(request);
-        request.DbContext.RepairParts.Add(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        var entity = Mapper!.Map<Domain.Entities.Basic.RepairPart>(request);
+        DbContext.RepairParts.Add(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
         return (Result.Success(), entity.EntityId);
     }
 }

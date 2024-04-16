@@ -13,29 +13,21 @@ public class CreateRequestStatusHistoryCommand : IRequest<(Result, int?)>
     public DateTime Date { get; init; }
     public int RepairRequestId { get; init; }
     public string RequestStatus { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreateRequestStatusHistoryHandler : IRequestHandler<CreateRequestStatusHistoryCommand, (Result, int?)>
+public class CreateRequestStatusHistoryHandler : BaseHandler,
+    IRequestHandler<CreateRequestStatusHistoryCommand, (Result, int?)>
 {
-    private readonly IMapper _mapper;
-
-    public CreateRequestStatusHistoryHandler(IMapper mapper)
+    public CreateRequestStatusHistoryHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<(Result, int?)> Handle(CreateRequestStatusHistoryCommand request,
         CancellationToken cancellationToken)
     {
-        var entity = _mapper.Map<Domain.Entities.Basic.RequestStatusHistory>(request);
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        request.DbContext.RequestStatusHistories.Add(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        var entity = Mapper!.Map<Domain.Entities.Basic.RequestStatusHistory>(request);
+        DbContext.RequestStatusHistories.Add(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
         return (Result.Success(), entity.EntityId);
     }
 }

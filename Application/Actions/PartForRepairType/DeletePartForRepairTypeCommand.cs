@@ -9,30 +9,24 @@ namespace Application.Actions.PartForRepairType;
 public class DeletePartForRepairTypeCommand : IRequest<Result>
 {
     public int Id { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class DeletePartForRepairTypeHandler : IRequestHandler<DeletePartForRepairTypeCommand, Result>
+public class DeletePartForRepairTypeHandler : BaseHandler, IRequestHandler<DeletePartForRepairTypeCommand, Result>
 {
-    public DeletePartForRepairTypeHandler(IApplicationDbContext context)
+    public DeletePartForRepairTypeHandler(IApplicationDbContext context) : base(context)
     {
     }
 
     public async Task<Result> Handle(DeletePartForRepairTypeCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.PartForRepairTypes.FindAsync(request.Id);
+        var entity = await DbContext.PartForRepairTypes.FindAsync(request.Id);
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.PartForRepairType), request.Id));
         }
 
-        request.DbContext.PartForRepairTypes.Remove(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        DbContext.PartForRepairTypes.Remove(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

@@ -10,25 +10,23 @@ namespace Application.Actions.RepairPart;
 public class GetRepairPartQuery : IRequest<(Result, Domain.Entities.Basic.RepairPart?)>
 {
     public int Id { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
 public class GetAllRepairPartsQuery : IRequest<(Result, IEnumerable<Domain.Entities.Basic.RepairPart>?)>
 {
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class GetRepairPartHandler : IRequestHandler<GetRepairPartQuery, (Result, Domain.Entities.Basic.RepairPart?)>
+public class GetRepairPartHandler : BaseHandler,
+    IRequestHandler<GetRepairPartQuery, (Result, Domain.Entities.Basic.RepairPart?)>
 {
+    public GetRepairPartHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, Domain.Entities.Basic.RepairPart?)> Handle(GetRepairPartQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        var entity = await request.DbContext.RepairParts.FindAsync(request.Id);
+        var entity = await DbContext.RepairParts.FindAsync(request.Id);
         return entity == null
             ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairPart), request.Id)), null)
             : (Result.Success(), entity);
@@ -36,16 +34,17 @@ public class GetRepairPartHandler : IRequestHandler<GetRepairPartQuery, (Result,
 }
 
 public class
-    GetAllRepairPartsHandler : IRequestHandler<GetAllRepairPartsQuery, (Result, IEnumerable<Domain.Entities.Basic.RepairPart>?)>
+    GetAllRepairPartsHandler : BaseHandler,
+    IRequestHandler<GetAllRepairPartsQuery, (Result, IEnumerable<Domain.Entities.Basic.RepairPart>?)>
 {
+    public GetAllRepairPartsHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.RepairPart>?)> Handle(GetAllRepairPartsQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-        var entities = await request.DbContext.RepairParts.ToListAsync(cancellationToken);
+        var entities = await DbContext.RepairParts.ToListAsync(cancellationToken);
         return (Result.Success(), entities);
     }
 }

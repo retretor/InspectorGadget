@@ -10,23 +10,21 @@ namespace Application.Actions.RepairRequest;
 public class IsAvailableAllPartsForRepairRequestQuery : IRequest<(Result, bool?)>
 {
     public int EntityId { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
 public class
-    IsAvailableAllPartsForRepairRequestHandler : IRequestHandler<IsAvailableAllPartsForRepairRequestQuery,
+    IsAvailableAllPartsForRepairRequestHandler : BaseHandler, IRequestHandler<IsAvailableAllPartsForRepairRequestQuery,
     (Result, bool?)>
 {
+    public IsAvailableAllPartsForRepairRequestHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, bool?)> Handle(IsAvailableAllPartsForRepairRequestQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
         var entity = await Task.Run(() =>
-            request.DbContext.IsAvailableAllParts(request.EntityId).SingleOrDefaultAsync());
+            DbContext.IsAvailableAllParts(request.EntityId).SingleOrDefaultAsync());
         return entity == null
             ? (Result.Failure(new NotFoundException(nameof(RepairRequest), request.EntityId)), null)
             : (Result.Success(), entity.Result);

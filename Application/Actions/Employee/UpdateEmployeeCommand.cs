@@ -16,34 +16,25 @@ public class UpdateEmployeeCommand : IRequest<Result>
     public int ExperienceYears { get; set; }
     public int YearsInCompany { get; set; }
     public int Rating { get; set; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class UpdateEmployeeHandler : IRequestHandler<UpdateEmployeeCommand, Result>
+public class UpdateEmployeeHandler : BaseHandler, IRequestHandler<UpdateEmployeeCommand, Result>
 {
-    private readonly IMapper _mapper;
-
-    public UpdateEmployeeHandler(IMapper mapper)
+    public UpdateEmployeeHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<Result> Handle(UpdateEmployeeCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.Employees.FindAsync(request.EntityId);
+        var entity = await DbContext.Employees.FindAsync(request.EntityId);
 
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), request.EntityId));
         }
 
-        _mapper.Map(request, entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        Mapper!.Map(request, entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

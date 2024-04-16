@@ -9,26 +9,24 @@ namespace Application.Actions.RepairTypeForDevice;
 public class DeleteRepairTypeForDeviceCommand : IRequest<Result>
 {
     public int Id { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class DeleteRepairTypeForDeviceHandler : IRequestHandler<DeleteRepairTypeForDeviceCommand, Result>
+public class DeleteRepairTypeForDeviceHandler : BaseHandler, IRequestHandler<DeleteRepairTypeForDeviceCommand, Result>
 {
+    public DeleteRepairTypeForDeviceHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<Result> Handle(DeleteRepairTypeForDeviceCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.RepairTypeForDevices.FindAsync(request.Id);
+        var entity = await DbContext.RepairTypeForDevices.FindAsync(request.Id);
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(RepairTypeForDevice), request.Id));
         }
 
-        request.DbContext.RepairTypeForDevices.Remove(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        DbContext.RepairTypeForDevices.Remove(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

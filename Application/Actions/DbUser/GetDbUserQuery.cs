@@ -10,25 +10,22 @@ namespace Application.Actions.DbUser;
 public class GetDbUserQuery : IRequest<(Result, Domain.Entities.Basic.DbUser?)>
 {
     public int Id { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
 public class GetAllDbUsersQuery : IRequest<(Result, IEnumerable<Domain.Entities.Basic.DbUser>?)>
 {
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class GetDbUserHandler : IRequestHandler<GetDbUserQuery, (Result, Domain.Entities.Basic.DbUser?)>
+public class GetDbUserHandler : BaseHandler, IRequestHandler<GetDbUserQuery, (Result, Domain.Entities.Basic.DbUser?)>
 {
+    public GetDbUserHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, Domain.Entities.Basic.DbUser?)> Handle(GetDbUserQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        var entity = await request.DbContext.DbUsers.FindAsync(request.Id);
+        var entity = await DbContext.DbUsers.FindAsync(request.Id);
         return entity == null
             ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.DbUser), request.Id)), null)
             : (Result.Success(), entity);
@@ -36,17 +33,17 @@ public class GetDbUserHandler : IRequestHandler<GetDbUserQuery, (Result, Domain.
 }
 
 public class
-    GetAllDbUsersHandler : IRequestHandler<GetAllDbUsersQuery, (Result, IEnumerable<Domain.Entities.Basic.DbUser>?)>
+    GetAllDbUsersHandler : BaseHandler,
+    IRequestHandler<GetAllDbUsersQuery, (Result, IEnumerable<Domain.Entities.Basic.DbUser>?)>
 {
+    public GetAllDbUsersHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, IEnumerable<Domain.Entities.Basic.DbUser>?)> Handle(GetAllDbUsersQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
-        var entities = await request.DbContext.DbUsers.ToListAsync(cancellationToken);
+        var entities = await DbContext.DbUsers.ToListAsync(cancellationToken);
         return (Result.Success(), entities);
     }
 }

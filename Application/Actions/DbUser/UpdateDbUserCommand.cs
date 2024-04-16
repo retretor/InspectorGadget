@@ -15,34 +15,25 @@ public class UpdateDbUserCommand : IRequest<Result>
     public string PasswordHash { get; init; } = null!;
     public string SecretKey { get; set; } = null!;
     public string Role { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class UpdateDbUserHandler : IRequestHandler<UpdateDbUserCommand, Result>
+public class UpdateDbUserHandler : BaseHandler, IRequestHandler<UpdateDbUserCommand, Result>
 {
-    private readonly IMapper _mapper;
-
-    public UpdateDbUserHandler(IMapper mapper)
+    public UpdateDbUserHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<Result> Handle(UpdateDbUserCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.DbUsers.FindAsync(request.EntityId);
+        var entity = await DbContext.DbUsers.FindAsync(request.EntityId);
 
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.DbUser), request.EntityId));
         }
 
-        _mapper.Map(request, entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        Mapper!.Map(request, entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

@@ -1,8 +1,5 @@
 ﻿using System.Security.Claims;
 using Application.Actions.RepairTypeForDevice;
-using Application.Common.Exceptions;
-using Application.Common.Interfaces;
-using Application.Common.Models;
 using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,25 +14,17 @@ namespace Web.Controllers;
 public class RepairTypeForDeviceController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IAppDbContextProvider _dbContextProvider;
 
-    public RepairTypeForDeviceController(IMediator mediator, IAppDbContextProvider dbContextProvider)
+    public RepairTypeForDeviceController(IMediator mediator)
     {
         _mediator = mediator;
-        _dbContextProvider = dbContextProvider;
     }
 
     [HttpGet("{id}")]
     [AllowAnonymous]
     public async Task<IActionResult> Get(int id)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        var (result, entity) = await _mediator.Send(new GetRepairTypeForDeviceQuery { Id = id, DbContext = dbContext });
+        var (result, entity) = await _mediator.Send(new GetRepairTypeForDeviceQuery { Id = id });
         return result.Succeeded ? Ok(entity) : BadRequest(result);
     }
 
@@ -43,13 +32,6 @@ public class RepairTypeForDeviceController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetAll([FromQuery] GetAllRepairTypeForDevicesQuery command)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        command.DbContext = dbContext;
         var (result, entities) = await _mediator.Send(command);
         return result.Succeeded ? Ok(entities) : BadRequest(result);
     }
@@ -58,33 +40,14 @@ public class RepairTypeForDeviceController : ControllerBase
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Create([FromQuery] CreateRepairTypeForDeviceCommand command)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        command.DbContext = dbContext;
         var (result, id) = await _mediator.Send(command);
-        if (result.Succeeded == false)
-        {
-            return BadRequest(result);
-        }
-
-        return CreatedAtAction(nameof(Get), new { id }, id);
+        return result.Succeeded == false ? BadRequest(result) : CreatedAtAction(nameof(Get), new { id }, id);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Update([FromQuery] UpdateRepairTypeForDeviceCommand command)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        command.DbContext = dbContext;
         var result = await _mediator.Send(command);
         return result.Succeeded ? Ok() : BadRequest(result);
     }
@@ -93,13 +56,7 @@ public class RepairTypeForDeviceController : ControllerBase
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
     public async Task<IActionResult> Delete(int id)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        var result = await _mediator.Send(new DeleteRepairTypeForDeviceCommand { Id = id, DbContext = dbContext });
+        var result = await _mediator.Send(new DeleteRepairTypeForDeviceCommand { Id = id });
         return result.Succeeded ? Ok() : BadRequest(result);
     }
 }

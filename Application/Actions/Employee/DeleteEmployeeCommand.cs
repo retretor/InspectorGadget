@@ -9,27 +9,25 @@ namespace Application.Actions.Employee;
 public class DeleteEmployeeCommand : IRequest<Result>
 {
     public int Id { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class DeleteEmployeeHandler : IRequestHandler<DeleteEmployeeCommand, Result>
+public class DeleteEmployeeHandler : BaseHandler, IRequestHandler<DeleteEmployeeCommand, Result>
 {
+    public DeleteEmployeeHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<Result> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.Employees.FindAsync(request.Id);
+        var entity = await DbContext.Employees.FindAsync(request.Id);
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), request.Id));
         }
 
-        request.DbContext.Employees.Remove(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
-        
+        DbContext.Employees.Remove(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
+
         return Result.Success();
     }
 }

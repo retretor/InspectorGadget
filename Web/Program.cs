@@ -59,3 +59,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+// TODO: Change permissions on sql server side

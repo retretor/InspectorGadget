@@ -16,34 +16,25 @@ public class UpdateDeviceCommand : IRequest<Result>
     public string Brand { get; init; } = null!;
     public string Series { get; init; } = null!;
     public string Manufacturer { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class UpdateDeviceHandler : IRequestHandler<UpdateDeviceCommand, Result>
+public class UpdateDeviceHandler : BaseHandler, IRequestHandler<UpdateDeviceCommand, Result>
 {
-    private readonly IMapper _mapper;
-
-    public UpdateDeviceHandler(IMapper mapper)
+    public UpdateDeviceHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<Result> Handle(UpdateDeviceCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.Devices.FindAsync(request.EntityId);
+        var entity = await DbContext.Devices.FindAsync(request.EntityId);
 
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Device), request.EntityId));
         }
 
-        _mapper.Map(request, entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        Mapper!.Map(request, entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

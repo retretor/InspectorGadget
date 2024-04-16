@@ -14,35 +14,26 @@ public class UpdateRepairTypeForDeviceCommand : IRequest<Result>
     public int DaysToComplete { get; init; }
     public int RepairTypeId { get; init; }
     public int DeviceId { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class UpdateRepairTypeForDeviceHandler : IRequestHandler<UpdateRepairTypeForDeviceCommand, Result>
+public class UpdateRepairTypeForDeviceHandler : BaseHandler, IRequestHandler<UpdateRepairTypeForDeviceCommand, Result>
 {
-    private readonly IMapper _mapper;
-
-    public UpdateRepairTypeForDeviceHandler(IMapper mapper)
+    public UpdateRepairTypeForDeviceHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
     public async Task<Result> Handle(UpdateRepairTypeForDeviceCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return Result.Failure(new InvalidDbContextException());
-        }
-
-        var entity = await request.DbContext.RepairTypeForDevices.FindAsync(request.EntityId);
+        var entity = await DbContext.RepairTypeForDevices.FindAsync(request.EntityId);
 
         if (entity == null)
         {
             return Result.Failure(new NotFoundException(nameof(RepairTypeForDevice), request.EntityId));
         }
 
-        _mapper.Map(request, entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
-        
+        Mapper!.Map(request, entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
+
         return Result.Success();
     }
 }

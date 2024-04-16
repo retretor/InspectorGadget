@@ -12,27 +12,23 @@ public class GetMasterRankingQuery : IRequest<(Result, MasterRankingResult?)>
 {
     public DateTime PeriodStart { get; init; }
     public DateTime PeriodEnd { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class
-    GetMasterRankingHandler : IRequestHandler<GetMasterRankingQuery, (Result, MasterRankingResult
-    ?)>
+public class GetMasterRankingHandler : BaseHandler,
+    IRequestHandler<GetMasterRankingQuery, (Result, MasterRankingResult?)>
 {
+    public GetMasterRankingHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, MasterRankingResult?)> Handle(GetMasterRankingQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
         var entity = await Task.Run(() =>
-            request.DbContext.GetMasterRanking(request.PeriodStart, request.PeriodEnd).SingleOrDefaultAsync());
+            DbContext.GetMasterRanking(request.PeriodStart, request.PeriodEnd).SingleOrDefaultAsync());
         return entity == null
-            ? (
-                Result.Failure(new NotFoundException(nameof(MasterRankingResult),
-                    (request.PeriodStart, request.PeriodEnd))), null)
+            ? (Result.Failure(new NotFoundException(nameof(MasterRankingResult),
+                (request.PeriodStart, request.PeriodEnd))), null)
             : (Result.Success(), entity);
     }
 }

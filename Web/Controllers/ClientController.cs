@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using Application.Actions.Client;
 using Application.Common.Exceptions;
-using Application.Common.Interfaces;
 using Application.Common.Models;
 using Domain.Enums;
 using MediatR;
@@ -17,12 +16,10 @@ namespace Web.Controllers;
 public class ClientController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IAppDbContextProvider _dbContextProvider;
 
-    public ClientController(IMediator mediator, IAppDbContextProvider dbContextProvider)
+    public ClientController(IMediator mediator)
     {
         _mediator = mediator;
-        _dbContextProvider = dbContextProvider;
     }
 
     [HttpGet("{id}")]
@@ -35,13 +32,7 @@ public class ClientController : ControllerBase
             return BadRequest(Result.Failure(new AccessDeniedException()));
         }
 
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        var (result, entity) = await _mediator.Send(new GetClientQuery { Id = id, DbContext = dbContext });
+        var (result, entity) = await _mediator.Send(new GetClientQuery { Id = id });
         return result.Succeeded ? Ok(entity) : BadRequest(result);
     }
 
@@ -49,12 +40,6 @@ public class ClientController : ControllerBase
     [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.RECEPTIONIST })]
     public async Task<IActionResult> GetAll([FromQuery] GetAllClientsQuery command)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
         var (result, entities) = await _mediator.Send(command);
         return result.Succeeded ? Ok(entities) : BadRequest(result);
     }
@@ -63,13 +48,6 @@ public class ClientController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Create([FromQuery] CreateClientCommand command)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        command.DbContext = dbContext;
         var (result, id) = await _mediator.Send(command);
         if (result.Succeeded == false)
         {
@@ -79,17 +57,10 @@ public class ClientController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id }, id);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST })]
     public async Task<IActionResult> Update([FromQuery] UpdateClientCommand command)
     {
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        command.DbContext = dbContext;
         var result = await _mediator.Send(command);
         return result.Succeeded ? Ok() : BadRequest(result);
     }
@@ -104,13 +75,7 @@ public class ClientController : ControllerBase
             return BadRequest(Result.Failure(new AccessDeniedException()));
         }
 
-        var dbContext = _dbContextProvider.GetDbContext(Utils.GetUserRole(User));
-        if (dbContext == null)
-        {
-            return BadRequest(Result.Failure(new UnableToConnectToDatabaseException()));
-        }
-
-        var result = await _mediator.Send(new DeleteClientCommand { Id = id, DbContext = dbContext});
-        return result.Succeeded ? Ok() : BadRequest(result);  
+        var result = await _mediator.Send(new DeleteClientCommand { Id = id });
+        return result.Succeeded ? Ok() : BadRequest(result);
     }
 }

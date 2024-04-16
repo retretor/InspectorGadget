@@ -15,28 +15,23 @@ public class CreateClientCommand : IRequest<(Result, int?)>
     public string Login { get; init; } = null!;
     public string PasswordHash { get; init; } = null!;
     public string SecretKey { get; init; } = null!;
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreateClientHandler : IRequestHandler<CreateClientCommand, (Result, int?)>
+public class CreateClientHandler : BaseHandler, IRequestHandler<CreateClientCommand, (Result, int?)>
 {
+    public CreateClientHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, int?)> Handle(CreateClientCommand request, CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
         // TODO: change returning type to Client
-        var dbUserId = await Task.Run(() => request.DbContext.CreateClient(request.FirstName, request.SecondName,
+        var dbUserId = await Task.Run(() => DbContext.CreateClient(request.FirstName, request.SecondName,
             request.TelephoneNumber, request.DiscountPercentage, request.Login, request.PasswordHash,
             request.SecretKey).SingleOrDefault(), cancellationToken);
-        if (dbUserId == null)
-        {
-            return (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), 0)), null);
-        }
-
-        return (Result.Success(), dbUserId.Result);
+        return dbUserId == null
+            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), 0)), null)
+            : (Result.Success(), dbUserId.Result);
     }
 }
 

@@ -10,22 +10,20 @@ namespace Application.Actions.RepairRequest;
 public class CalculateRepairRequestTimeQuery : IRequest<(Result, int?)>
 {
     public int EntityId { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
 public class
-    CalculateRepairRequestTimeHandler : IRequestHandler<CalculateRepairRequestTimeQuery, (Result, int?)>
+    CalculateRepairRequestTimeHandler : BaseHandler, IRequestHandler<CalculateRepairRequestTimeQuery, (Result, int?)>
 {
+    public CalculateRepairRequestTimeHandler(IApplicationDbContext dbContext) : base(dbContext)
+    {
+    }
+
     public async Task<(Result, int?)> Handle(CalculateRepairRequestTimeQuery request,
         CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-
         var entity = await Task.Run(() =>
-            request.DbContext.CalculateRepairTime(request.EntityId).SingleOrDefaultAsync());
+            DbContext.CalculateRepairTime(request.EntityId).SingleOrDefaultAsync());
         return entity == null
             ? (Result.Failure(new NotFoundException(nameof(RepairRequest), request.EntityId)), null)
             : (Result.Success(), entity.Result);

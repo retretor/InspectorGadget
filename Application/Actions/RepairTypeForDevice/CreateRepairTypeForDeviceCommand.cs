@@ -13,27 +13,21 @@ public class CreateRepairTypeForDeviceCommand : IRequest<(Result, int?)>
     public int DaysToComplete { get; init; }
     public int RepairTypeId { get; init; }
     public int DeviceId { get; init; }
-    public IApplicationDbContext? DbContext { get; set; }
 }
 
-public class CreateRepairTypeForDeviceHandler : IRequestHandler<CreateRepairTypeForDeviceCommand, (Result, int?)>
+public class CreateRepairTypeForDeviceHandler : BaseHandler,
+    IRequestHandler<CreateRepairTypeForDeviceCommand, (Result, int?)>
 {
-    private readonly IMapper _mapper;
-
-    public CreateRepairTypeForDeviceHandler(IMapper mapper)
+    public CreateRepairTypeForDeviceHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
-        _mapper = mapper;
     }
 
-    public async Task<(Result, int?)> Handle(CreateRepairTypeForDeviceCommand request, CancellationToken cancellationToken)
+    public async Task<(Result, int?)> Handle(CreateRepairTypeForDeviceCommand request,
+        CancellationToken cancellationToken)
     {
-        if (request.DbContext == null)
-        {
-            return (Result.Failure(new InvalidDbContextException()), null);
-        }
-        var entity = _mapper.Map<Domain.Entities.Basic.RepairTypeForDevice>(request);
-        request.DbContext.RepairTypeForDevices.Add(entity);
-        await request.DbContext.SaveChangesAsync(cancellationToken);
+        var entity = Mapper!.Map<Domain.Entities.Basic.RepairTypeForDevice>(request);
+        DbContext.RepairTypeForDevices.Add(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
         return (Result.Success(), entity.EntityId);
     }
 }
