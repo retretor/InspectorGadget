@@ -1,7 +1,8 @@
 ﻿using System.Text;
 using Application.Common.Interfaces;
 using Domain.Entities.Basic;
-using Domain.Entities.Composite;
+using Domain.Entities.DbResults;
+using Domain.Entities.Responses;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
@@ -47,6 +48,9 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
     #region Stored procedures
 
+    public virtual IQueryable<BoolResult> SetCurrentUser(int inputId) =>
+        FromExpression(() => SetCurrentUser(inputId));
+
     public virtual IQueryable<IntResult> AuthenticateUser(string inputLogin,
         string inputPasswordHash) =>
         FromExpression(() => AuthenticateUser(inputLogin, inputPasswordHash));
@@ -67,15 +71,20 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
     public virtual IQueryable<IntResult> CreateEmployee(string inputFirstName, string inputSecondName,
         string inputTelephoneNumber, int experienceYears, int yearsInCompany, int rating, string inputLogin,
-        string inputPasswordHash, string secretKey, string inputRole) =>
+        string inputPasswordHash, string secretKey, string inputRole, string inputPhotoPath) =>
         FromExpression(() => CreateEmployee(inputFirstName, inputSecondName, inputTelephoneNumber, experienceYears,
-            yearsInCompany, rating, inputLogin, inputPasswordHash, secretKey, inputRole));
+            yearsInCompany, rating, inputLogin, inputPasswordHash, secretKey, inputRole, inputPhotoPath));
 
     public IQueryable<BoolResult> UpdateEmployeeRole(int inputEmployeeId, string inputRole) =>
         FromExpression(() => UpdateEmployeeRole(inputEmployeeId, inputRole));
 
     public IQueryable<IntResult> GetPartsCount(int inputPartId) =>
         FromExpression(() => GetPartsCount(inputPartId));
+
+    public IQueryable<PartsForDeviceResult> GetPartsForDevice(int inputDeviceId) =>
+        FromExpression(() => GetPartsForDevice(inputDeviceId));
+
+    public IQueryable<PartResult> GetAllParts() => FromExpression(() => GetAllParts());
 
     public IQueryable<BoolResult> ChangeRepairRequestStatus(int inputRepairRequestId, string inputStatus,
         DateTime inputDate)
@@ -109,11 +118,16 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
     public IQueryable<BoolResult> IsAvailableAllParts(int? inputRequestId) =>
         FromExpression(() => IsAvailableAllParts(inputRequestId));
 
+    public IQueryable<IntResult> CreateRepairRequest(int inputDeviceId, int inputClientId,
+        string inputSerialNumber, string inputDescription) =>
+        FromExpression(() => CreateRepairRequest(inputDeviceId, inputClientId, inputSerialNumber, inputDescription));
+
     #endregion
 
     private static void RegisterFunctions(ModelBuilder modelBuilder)
     {
         // STORED PROCEDURES
+        RegisterDbFunction(modelBuilder, nameof(SetCurrentUser), "set_current_user", typeof(BoolResult));
         RegisterDbFunction(modelBuilder, nameof(AuthenticateUser), "authenticate_user", typeof(IntResult));
         RegisterDbFunction(modelBuilder, nameof(GetUserLoginByTelephone), "get_user_login_by_telephone",
             typeof(StringResult));
@@ -126,6 +140,9 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             typeof(PartsInfoResult));
         RegisterDbFunction(modelBuilder, nameof(GetPartsMoreMinCountInfo), "get_parts_more_min_count_info",
             typeof(PartsInfoResult));
+        RegisterDbFunction(modelBuilder, nameof(GetPartsForDevice), "get_parts_for_device",
+            typeof(PartsForDeviceResult));
+        RegisterDbFunction(modelBuilder, nameof(GetAllParts), "get_all_parts", typeof(PartResult));
         RegisterDbFunction(modelBuilder, nameof(CalculateRepairCost), "calculate_repair_cost",
             typeof(IntResult));
         RegisterDbFunction(modelBuilder, nameof(GetRequestInfo), "get_request_info",
@@ -139,7 +156,9 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
         RegisterDbFunction(modelBuilder, nameof(ChangeRepairRequestStatus), "change_repair_request_status",
             typeof(BoolResult));
         RegisterDbFunction(modelBuilder, nameof(CalculateRepairTime), "calculate_repair_time", typeof(IntResult));
+        RegisterDbFunction(modelBuilder, nameof(CreateRepairRequest), "create_repair_request", typeof(IntResult));
     }
+
     private static void RegisterDbFunction(ModelBuilder modelBuilder, string methodName, string functionName,
         Type? returnType)
     {
@@ -272,6 +291,9 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.Property(e => e.Type)
                 .HasMaxLength(255)
                 .HasColumnName("type");
+            entity.Property(e => e.PhotoPath)
+                .HasMaxLength(255)
+                .HasColumnName("photo_path");
         });
 
         modelBuilder.Entity<Employee>(entity =>
@@ -295,6 +317,9 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
             entity.Property(e => e.TelephoneNumber)
                 .HasMaxLength(255)
                 .HasColumnName("telephone_number");
+            entity.Property(e => e.PhotoPath)
+                .HasMaxLength(255)
+                .HasColumnName("photo_path");
             entity.Property(e => e.YearsInCompany).HasColumnName("years_in_company");
 
             entity.HasOne(d => d.DbUser).WithOne(p => p.Employee)
@@ -332,7 +357,8 @@ public class InspectorGadgetDbContext : DbContext, IApplicationDbContext
 
             entity.ToTable("repair_part");
 
-            entity.HasIndex(e => e.Name, "repair_part_name_key").IsUnique();
+            entity.HasIndex(e => new { e.Name, e.Condition },
+                "repair_part_name_condition_key").IsUnique();
 
             entity.Property(e => e.EntityId).HasColumnName("id");
             entity.Property(e => e.Condition)

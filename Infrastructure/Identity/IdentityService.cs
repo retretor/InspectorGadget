@@ -3,7 +3,6 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Domain.Entities.Basic;
-using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Identity;
@@ -11,11 +10,10 @@ namespace Infrastructure.Identity;
 public class IdentityService : IIdentityService
 {
     private readonly IApplicationDbContext _context;
-
-    public IdentityService(IAppDbContextProvider contextProvider)
+    
+    public IdentityService(IApplicationDbContext dbContext)
     {
-        var context = contextProvider.GetDbContext(Role.ANONYMOUS);
-        _context = context ?? throw new UnableToConnectToDatabaseException();
+        _context = dbContext;
     }
 
     public async Task<DbUser?> GetUserByLogin(string login)

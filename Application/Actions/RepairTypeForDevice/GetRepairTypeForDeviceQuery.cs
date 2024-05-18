@@ -29,7 +29,7 @@ public class GetRepairTypeForDeviceHandler : BaseHandler, IRequestHandler<GetRep
     {
         var entity = await DbContext.RepairTypeForDevices.FindAsync(request.Id);
         return entity == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairTypeForDevice), request.Id)),
+            ? (Result.Failure(new NotFoundException(nameof(RepairTypeForDevice), request.Id)),
                 null)
             : (Result.Success(), entity);
     }

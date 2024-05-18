@@ -22,7 +22,7 @@ public class DeleteRepairPartHandler : BaseHandler, IRequestHandler<DeleteRepair
         var entity = await DbContext.RepairParts.FindAsync(request.Id);
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairPart), request.Id));
+            return Result.Failure(new NotFoundException(nameof(RepairPart), request.Id));
         }
 
         DbContext.RepairParts.Remove(entity);

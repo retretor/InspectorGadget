@@ -22,7 +22,7 @@ public class DeleteEmployeeHandler : BaseHandler, IRequestHandler<DeleteEmployee
         var entity = await DbContext.Employees.FindAsync(request.Id);
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), request.Id));
+            return Result.Failure(new NotFoundException(nameof(Employee), request.Id));
         }
 
         DbContext.Employees.Remove(entity);

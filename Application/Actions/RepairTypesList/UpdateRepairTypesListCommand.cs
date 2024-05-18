@@ -27,7 +27,7 @@ public class UpdateRepairTypesListHandler : BaseHandler, IRequestHandler<UpdateR
         if (entity == null)
         {
             return Result.Failure(
-                new NotFoundException(nameof(Domain.Entities.Basic.RepairTypesList), request.EntityId));
+                new NotFoundException(nameof(RepairTypesList), request.EntityId));
         }
 
         Mapper!.Map(request, entity);

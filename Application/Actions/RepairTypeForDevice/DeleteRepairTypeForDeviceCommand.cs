@@ -3,12 +3,14 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Actions.RepairTypeForDevice;
 
 public class DeleteRepairTypeForDeviceCommand : IRequest<Result>
 {
-    public int Id { get; init; }
+    public int DeviceId { get; init; }
+    public int RepairTypeId { get; init; }
 }
 
 public class DeleteRepairTypeForDeviceHandler : BaseHandler, IRequestHandler<DeleteRepairTypeForDeviceCommand, Result>
@@ -19,10 +21,11 @@ public class DeleteRepairTypeForDeviceHandler : BaseHandler, IRequestHandler<Del
 
     public async Task<Result> Handle(DeleteRepairTypeForDeviceCommand request, CancellationToken cancellationToken)
     {
-        var entity = await DbContext.RepairTypeForDevices.FindAsync(request.Id);
+        var entity = await DbContext.RepairTypeForDevices.FirstOrDefaultAsync(x =>
+            x.DeviceId == request.DeviceId && x.RepairTypeId == request.RepairTypeId, cancellationToken);
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(RepairTypeForDevice), request.Id));
+            return Result.Failure(new NotFoundException(nameof(RepairTypeForDevice), $"{request.DeviceId} {request.RepairTypeId}"));
         }
 
         DbContext.RepairTypeForDevices.Remove(entity);
@@ -36,6 +39,7 @@ public class DeleteRepairTypeForDeviceValidator : AbstractValidator<DeleteRepair
 {
     public DeleteRepairTypeForDeviceValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.RepairTypeId).NotEmpty();
+        RuleFor(x => x.DeviceId).NotEmpty();
     }
 }

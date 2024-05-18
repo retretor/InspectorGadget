@@ -16,6 +16,7 @@ public class UpdateDeviceCommand : IRequest<Result>
     public string Brand { get; init; } = null!;
     public string Series { get; init; } = null!;
     public string Manufacturer { get; init; } = null!;
+    public string PhotoPath { get; set; } = null!;
 }
 
 public class UpdateDeviceHandler : BaseHandler, IRequestHandler<UpdateDeviceCommand, Result>
@@ -30,7 +31,7 @@ public class UpdateDeviceHandler : BaseHandler, IRequestHandler<UpdateDeviceComm
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Device), request.EntityId));
+            return Result.Failure(new NotFoundException(nameof(Device), request.EntityId));
         }
 
         Mapper!.Map(request, entity);
@@ -50,5 +51,6 @@ public class UpdateDeviceValidator : AbstractValidator<UpdateDeviceCommand>
         RuleFor(x => x.Brand).NotEmpty().MaximumLength(255);
         RuleFor(x => x.Series).NotEmpty().MaximumLength(255);
         RuleFor(x => x.Manufacturer).NotEmpty().MaximumLength(255);
+        RuleFor(x => x.PhotoPath).NotEmpty();
     }
 }

@@ -28,7 +28,7 @@ public class UpdateRequestStatusHistoryHandler : BaseHandler, IRequestHandler<Up
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RequestStatusHistory),
+            return Result.Failure(new NotFoundException(nameof(RequestStatusHistory),
                 request.EntityId));
         }
 

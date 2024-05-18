@@ -28,7 +28,7 @@ public class GetPartForRepairTypeHandler : BaseHandler, IRequestHandler<GetPartF
     {
         var entity = await DbContext.PartForRepairTypes.FindAsync(request.Id);
         return entity == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.PartForRepairType), request.Id)), null)
+            ? (Result.Failure(new NotFoundException(nameof(PartForRepairType), request.Id)), null)
             : (Result.Success(), entity);
     }
 }

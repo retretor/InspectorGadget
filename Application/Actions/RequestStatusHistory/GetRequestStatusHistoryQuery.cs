@@ -29,7 +29,7 @@ public class GetRequestStatusHistoryHandler : BaseHandler, IRequestHandler<GetRe
     {
         var entity = await DbContext.RequestStatusHistories.FindAsync(request.Id);
         return entity == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RequestStatusHistory), request.Id)),
+            ? (Result.Failure(new NotFoundException(nameof(RequestStatusHistory), request.Id)),
                 null)
             : (Result.Success(), entity);
     }

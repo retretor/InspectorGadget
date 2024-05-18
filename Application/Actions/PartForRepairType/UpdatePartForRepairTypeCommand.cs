@@ -27,7 +27,7 @@ public class UpdatePartForRepairTypeHandler : BaseHandler, IRequestHandler<Updat
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.PartForRepairType),
+            return Result.Failure(new NotFoundException(nameof(PartForRepairType),
                 request.EntityId));
         }
 

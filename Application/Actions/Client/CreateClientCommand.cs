@@ -1,37 +1,38 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
+using Domain.Entities.Responses;
 using FluentValidation;
 using MediatR;
 
 namespace Application.Actions.Client;
 
-public class CreateClientCommand : IRequest<(Result, int?)>
+public class CreateClientCommand : IRequest<(Result, CreateClientResponse?)>
 {
     public string FirstName { get; init; } = null!;
     public string SecondName { get; init; } = null!;
     public string TelephoneNumber { get; init; } = null!;
-    public int DiscountPercentage { get; init; }
+    public int DiscountPercentage { get; init; } = 0;
     public string Login { get; init; } = null!;
     public string PasswordHash { get; init; } = null!;
     public string SecretKey { get; init; } = null!;
 }
 
-public class CreateClientHandler : BaseHandler, IRequestHandler<CreateClientCommand, (Result, int?)>
+public class CreateClientHandler : BaseHandler, IRequestHandler<CreateClientCommand, (Result, CreateClientResponse?)>
 {
     public CreateClientHandler(IApplicationDbContext dbContext) : base(dbContext)
     {
     }
 
-    public async Task<(Result, int?)> Handle(CreateClientCommand request, CancellationToken cancellationToken)
+    public async Task<(Result, CreateClientResponse?)> Handle(CreateClientCommand request,
+        CancellationToken cancellationToken)
     {
-        // TODO: change returning type to Client
         var dbUserId = await Task.Run(() => DbContext.CreateClient(request.FirstName, request.SecondName,
             request.TelephoneNumber, request.DiscountPercentage, request.Login, request.PasswordHash,
             request.SecretKey).SingleOrDefault(), cancellationToken);
         return dbUserId == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), 0)), null)
-            : (Result.Success(), dbUserId.Result);
+            ? (Result.Failure(new NotFoundException(nameof(Client), 0)), null)
+            : (Result.Success(), new CreateClientResponse { DbUserId = dbUserId.Result });
     }
 }
 

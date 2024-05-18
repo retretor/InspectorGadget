@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Domain.Entities.Composite;
+namespace Domain.Entities.DbResults;
 
 public class MasterRankingResult
 {
@@ -13,6 +13,4 @@ public class MasterRankingResult
     [Column("repairs_period_rank")] public int RepairsPeriodRank { get; set; }
 
     [Column("cost_period_rank")] public int CostPeriodRank { get; set; }
-
-    [Column("repair_types_rank")] public int RepairTypesRank { get; set; }
 }

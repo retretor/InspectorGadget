@@ -1,32 +1,31 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
-using Domain.Entities.Composite;
+using Domain.Entities.DbResults;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Actions.Employee;
 
-public class GetMasterRankingQuery : IRequest<(Result, MasterRankingResult?)>
+public class GetMasterRankingQuery : IRequest<(Result, List<MasterRankingResult>?)>
 {
     public DateTime PeriodStart { get; init; }
     public DateTime PeriodEnd { get; init; }
 }
 
 public class GetMasterRankingHandler : BaseHandler,
-    IRequestHandler<GetMasterRankingQuery, (Result, MasterRankingResult?)>
+    IRequestHandler<GetMasterRankingQuery, (Result, List<MasterRankingResult>?)>
 {
     public GetMasterRankingHandler(IApplicationDbContext dbContext) : base(dbContext)
     {
     }
 
-    public async Task<(Result, MasterRankingResult?)> Handle(GetMasterRankingQuery request,
+    public async Task<(Result, List<MasterRankingResult>?)> Handle(GetMasterRankingQuery request,
         CancellationToken cancellationToken)
     {
         var entity = await Task.Run(() =>
-            DbContext.GetMasterRanking(request.PeriodStart, request.PeriodEnd).SingleOrDefaultAsync());
-        return entity == null
+            DbContext.GetMasterRanking(request.PeriodStart, request.PeriodEnd).ToList());
+        return entity.Count == 0
             ? (Result.Failure(new NotFoundException(nameof(MasterRankingResult),
                 (request.PeriodStart, request.PeriodEnd))), null)
             : (Result.Success(), entity);

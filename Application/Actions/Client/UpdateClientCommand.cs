@@ -18,7 +18,7 @@ public class UpdateClientCommand : IRequest<Result>
 
 public class UpdateClientHandler : BaseHandler, IRequestHandler<UpdateClientCommand, Result>
 {
-    public UpdateClientHandler(IMapper mapper, IApplicationDbContext dbContext) : base(dbContext, mapper)
+    public UpdateClientHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
     }
 
@@ -28,9 +28,10 @@ public class UpdateClientHandler : BaseHandler, IRequestHandler<UpdateClientComm
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), request.EntityId));
+            return Result.Failure(new NotFoundException(nameof(Client), request.EntityId));
         }
 
+        // TODO: MAYBE DELETE MAP FROM UPDATE
         Mapper!.Map(request, entity);
         await DbContext.SaveChangesAsync(cancellationToken);
 

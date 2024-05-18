@@ -27,7 +27,7 @@ public class GetDeviceHandler : BaseHandler, IRequestHandler<GetDeviceQuery, (Re
     {
         var entity = await DbContext.Devices.FindAsync(request.Id);
         return entity == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Device), request.Id)), null)
+            ? (Result.Failure(new NotFoundException(nameof(Device), request.Id)), null)
             : (Result.Success(), entity);
     }
 }

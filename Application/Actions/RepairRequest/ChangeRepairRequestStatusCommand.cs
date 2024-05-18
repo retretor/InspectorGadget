@@ -1,7 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
-using AutoMapper;
 using Domain.Enums;
 using FluentValidation;
 using MediatR;

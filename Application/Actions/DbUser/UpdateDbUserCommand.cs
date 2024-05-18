@@ -29,7 +29,7 @@ public class UpdateDbUserHandler : BaseHandler, IRequestHandler<UpdateDbUserComm
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.DbUser), request.EntityId));
+            return Result.Failure(new NotFoundException(nameof(DbUser), request.EntityId));
         }
 
         Mapper!.Map(request, entity);

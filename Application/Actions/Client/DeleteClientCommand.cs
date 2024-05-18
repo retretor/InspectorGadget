@@ -22,7 +22,7 @@ public class DeleteClientHandler : BaseHandler, IRequestHandler<DeleteClientComm
         var entity = await DbContext.Clients.FindAsync(request.Id);
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), request.Id));
+            return Result.Failure(new NotFoundException(nameof(Client), request.Id));
         }
 
         DbContext.Clients.Remove(entity);

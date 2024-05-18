@@ -1,5 +1,7 @@
 ﻿using System.Security.Claims;
 using Application.Actions.DbUser;
+using Application.Common.Exceptions;
+using Application.Common.Models;
 using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,10 +22,20 @@ public class DbUserController : ControllerBase
         _mediator = mediator;
     }
 
+    // TODO: Change this method
     [HttpGet("{id}")]
-    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.CLIENT })]
     public async Task<IActionResult> Get(int id)
     {
+        var userId = User.Claims.First(c => c.Type == ClaimTypes.Sid).Value;
+        Console.WriteLine($"User with id: {userId} tried to access to db user with id: {id}");
+        if (User.Claims.First(c => c.Type == ClaimTypes.Role).Value == Role.CLIENT.ToString() &&
+            User.Claims.Any(c => c.Type == ClaimTypes.Sid && c.Value != id.ToString()))
+        {
+            Console.WriteLine("Access denied");
+            return BadRequest(Result.Failure(new AccessDeniedException()));
+        }
+
         var (result, entity) = await _mediator.Send(new GetDbUserQuery { Id = id });
         return result.Succeeded ? Ok(entity) : BadRequest(result);
     }

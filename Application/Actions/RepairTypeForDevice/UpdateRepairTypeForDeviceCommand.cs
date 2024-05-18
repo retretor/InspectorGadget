@@ -4,16 +4,16 @@ using Application.Common.Models;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Actions.RepairTypeForDevice;
 
 public class UpdateRepairTypeForDeviceCommand : IRequest<Result>
 {
-    public int EntityId { get; init; }
+    public int DeviceId { get; init; }
+    public int RepairTypeId { get; init; }
     public float Cost { get; init; }
     public int DaysToComplete { get; init; }
-    public int RepairTypeId { get; init; }
-    public int DeviceId { get; init; }
 }
 
 public class UpdateRepairTypeForDeviceHandler : BaseHandler, IRequestHandler<UpdateRepairTypeForDeviceCommand, Result>
@@ -24,11 +24,13 @@ public class UpdateRepairTypeForDeviceHandler : BaseHandler, IRequestHandler<Upd
 
     public async Task<Result> Handle(UpdateRepairTypeForDeviceCommand request, CancellationToken cancellationToken)
     {
-        var entity = await DbContext.RepairTypeForDevices.FindAsync(request.EntityId);
+        var entity = await DbContext.RepairTypeForDevices.FirstOrDefaultAsync(x =>
+            x.DeviceId == request.DeviceId && x.RepairTypeId == request.RepairTypeId, cancellationToken);
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(RepairTypeForDevice), request.EntityId));
+            return Result.Failure(new NotFoundException(nameof(RepairTypeForDevice),
+                $"{request.DeviceId} {request.RepairTypeId}"));
         }
 
         Mapper!.Map(request, entity);
@@ -42,7 +44,6 @@ public class UpdateRepairTypeForDeviceValidator : AbstractValidator<UpdateRepair
 {
     public UpdateRepairTypeForDeviceValidator()
     {
-        RuleFor(x => x.EntityId).NotEmpty();
         RuleFor(x => x.Cost).NotEmpty().GreaterThan(0);
         RuleFor(x => x.DaysToComplete).NotEmpty().GreaterThan(0);
         RuleFor(x => x.RepairTypeId).NotEmpty();

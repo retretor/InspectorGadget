@@ -22,7 +22,7 @@ public class DeleteDeviceHandler : BaseHandler, IRequestHandler<DeleteDeviceComm
         var entity = await DbContext.Devices.FindAsync(request.Id);
         if (entity == null)
         {
-            throw new NotFoundException(nameof(Domain.Entities.Basic.Device), request.Id);
+            throw new NotFoundException(nameof(Device), request.Id);
         }
 
         DbContext.Devices.Remove(entity);

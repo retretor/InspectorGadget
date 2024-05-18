@@ -31,7 +31,7 @@ public class UpdateRepairPartHandler : BaseHandler, IRequestHandler<UpdateRepair
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairPart), request.EntityId));
+            return Result.Failure(new NotFoundException(nameof(RepairPart), request.EntityId));
         }
 
         Mapper!.Map(request, entity);

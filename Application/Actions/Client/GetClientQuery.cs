@@ -1,51 +1,54 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
+using AutoMapper;
+using Domain.Entities.Responses;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Actions.Client;
 
-public class GetClientQuery : IRequest<(Result, Domain.Entities.Basic.Client?)>
+public class GetClientQuery : IRequest<(Result, GetClientResponse?)>
 {
-    public int Id { get; init; }
+    public int DbUserId { get; init; }
 }
 
-public class GetAllClientsQuery : IRequest<(Result, IEnumerable<Domain.Entities.Basic.Client>?)>
+public class GetAllClientsQuery : IRequest<(Result, GetAllClientsResponse?)>
 {
 }
 
-public class GetClientHandler : BaseHandler, IRequestHandler<GetClientQuery, (Result, Domain.Entities.Basic.Client?)>
+public class GetClientHandler : BaseHandler, IRequestHandler<GetClientQuery, (Result, GetClientResponse?)>
 {
-    public GetClientHandler(IApplicationDbContext dbContext) : base(dbContext)
+    public GetClientHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
     }
 
-    public async Task<(Result, Domain.Entities.Basic.Client?)> Handle(GetClientQuery request,
+    public async Task<(Result, GetClientResponse?)> Handle(GetClientQuery request,
         CancellationToken cancellationToken)
     {
         var entity = await DbContext.Clients
-            .FirstOrDefaultAsync(client => client.EntityId == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(client => client.DbUserId == request.DbUserId, cancellationToken);
         return entity == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Client), request.Id)), null)
-            : (Result.Success(), entity);
+            ? (Result.Failure(new NotFoundException(nameof(DbUser), request.DbUserId)), null)
+            : (Result.Success(), Mapper!.Map<GetClientResponse>(entity));
     }
 }
 
 public class
     GetAllClientsHandler : BaseHandler,
-    IRequestHandler<GetAllClientsQuery, (Result, IEnumerable<Domain.Entities.Basic.Client>?)>
+    IRequestHandler<GetAllClientsQuery, (Result, GetAllClientsResponse?)>
 {
-    public GetAllClientsHandler(IApplicationDbContext dbContext) : base(dbContext)
+    public GetAllClientsHandler(IApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
     }
 
-    public async Task<(Result, IEnumerable<Domain.Entities.Basic.Client>?)> Handle(GetAllClientsQuery request,
+    public async Task<(Result, GetAllClientsResponse?)> Handle(GetAllClientsQuery request,
         CancellationToken cancellationToken)
     {
         var clients = await DbContext.Clients.ToListAsync(cancellationToken);
-        return (Result.Success(), clients);
+        return (Result.Success(),
+            new GetAllClientsResponse { Clients = Mapper!.Map<List<GetClientResponse>>(clients) });
     }
 }
 
@@ -53,6 +56,6 @@ public class GetClientValidator : AbstractValidator<GetClientQuery>
 {
     public GetClientValidator()
     {
-        RuleFor(v => v.Id).NotEmpty().GreaterThanOrEqualTo(0);
+        RuleFor(v => v.DbUserId).NotEmpty().GreaterThanOrEqualTo(0);
     }
 }

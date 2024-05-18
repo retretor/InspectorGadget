@@ -16,6 +16,7 @@ public class UpdateEmployeeCommand : IRequest<Result>
     public int ExperienceYears { get; set; }
     public int YearsInCompany { get; set; }
     public int Rating { get; set; }
+    public string PhotoPath { get; set; } = null!;
 }
 
 public class UpdateEmployeeHandler : BaseHandler, IRequestHandler<UpdateEmployeeCommand, Result>
@@ -30,7 +31,7 @@ public class UpdateEmployeeHandler : BaseHandler, IRequestHandler<UpdateEmployee
 
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), request.EntityId));
+            return Result.Failure(new NotFoundException(nameof(Employee), request.EntityId));
         }
 
         Mapper!.Map(request, entity);
@@ -52,5 +53,6 @@ public class UpdateEmployeeValidator : AbstractValidator<UpdateEmployeeCommand>
         RuleFor(x => x.ExperienceYears).GreaterThanOrEqualTo(0);
         RuleFor(x => x.YearsInCompany).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Rating).InclusiveBetween(0, 10);
+        RuleFor(x => x.PhotoPath).NotEmpty();
     }
 }

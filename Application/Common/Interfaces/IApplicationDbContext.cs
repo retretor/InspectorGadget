@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.Basic;
-using Domain.Entities.Composite;
+using Domain.Entities.DbResults;
+using Domain.Entities.Responses;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Common.Interfaces;
@@ -28,6 +29,7 @@ public interface IApplicationDbContext
     #region Stored Procedures
 
     // Authentication
+    public IQueryable<BoolResult> SetCurrentUser(int inputId);
     public IQueryable<IntResult> AuthenticateUser(string inputLogin, string inputPasswordHash);
 
     public IQueryable<StringResult> GetUserLoginByTelephone(string inputTelephone,
@@ -55,7 +57,9 @@ public interface IApplicationDbContext
         string inputLogin,
         string inputPasswordHash,
         string secretKey,
-        string inputRole);
+        string inputRole,
+        string inputPhotoPath);
+
     public IQueryable<BoolResult> UpdateEmployeeRole(int inputEmployeeId, string inputRole);
     public IQueryable<MasterRankingResult> GetMasterRanking(DateTime? inputPeriodStart, DateTime? inputPeriodEnd);
 
@@ -64,9 +68,16 @@ public interface IApplicationDbContext
     public IQueryable<PartsInfoResult> GetPartsLessMinCountInfo();
     public IQueryable<PartsInfoResult> GetPartsMoreMinCountInfo();
 
+    public IQueryable<PartsForDeviceResult> GetPartsForDevice(int inputDeviceId);
+    public IQueryable<PartResult> GetAllParts();
+
     // Repair Request
+    public IQueryable<IntResult> CreateRepairRequest(int inputDeviceId, int inputClientId,
+        string inputSerialNumber, string inputDescription);
+
     public IQueryable<BoolResult> ChangeRepairRequestStatus(int inputRepairRequestId, string inputStatus,
         DateTime inputDate);
+
     public IQueryable<IntResult> CalculateRepairCost(int? inputRequestId);
     public IQueryable<IntResult> CalculateRepairTime(int? inputRequestId);
     public IQueryable<AcceptRequestResult> AcceptRequest(int? inputRequestId);

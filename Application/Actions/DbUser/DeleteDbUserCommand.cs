@@ -22,7 +22,7 @@ public class DeleteDbUserHandler : BaseHandler, IRequestHandler<DeleteDbUserComm
         var entity = await DbContext.DbUsers.FindAsync(request.Id);
         if (entity == null)
         {
-            return Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.DbUser), request.Id));
+            return Result.Failure(new NotFoundException(nameof(DbUser), request.Id));
         }
 
         DbContext.DbUsers.Remove(entity);

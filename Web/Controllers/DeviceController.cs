@@ -3,7 +3,9 @@ using Application.Actions.Device;
 using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Web.Identity;
 
 namespace Web.Controllers;
@@ -14,10 +16,13 @@ namespace Web.Controllers;
 public class DeviceController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly string _imagePath;
 
-    public DeviceController(IMediator mediator)
+    public DeviceController(IMediator mediator, IConfiguration configuration)
     {
         _mediator = mediator;
+        _imagePath = configuration.GetValue<string>("ImageSettings:ImagePath") ??
+                     throw new ArgumentNullException(nameof(configuration));
     }
 
     [HttpGet("{id}")]
@@ -42,6 +47,23 @@ public class DeviceController : ControllerBase
     {
         var (result, id) = await _mediator.Send(command);
         return !result.Succeeded ? BadRequest(result) : CreatedAtAction(nameof(Get), new { id }, id);
+    }
+
+    [HttpPost("upload")]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN })]
+    public async Task<IActionResult> UploadImage(IFormFile file, string imageName)
+    {
+        if (file.Length == 0) return BadRequest("No file uploaded.");
+
+        var filePath = Path.Combine(_imagePath, imageName);
+
+        await using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        var fileUrl = $"{Request.Scheme}://{Request.Host}/images/{imageName}";
+        return Ok(new { Url = fileUrl });
     }
 
     [HttpPut]

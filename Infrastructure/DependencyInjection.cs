@@ -6,11 +6,9 @@ using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Npgsql;
 
 namespace Infrastructure;
 
@@ -19,11 +17,11 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-        dataSourceBuilder.UseNodaTime();
-        var dataSource = dataSourceBuilder.Build();
-        services.AddDbContext<InspectorGadgetDbContext>(options => { options.UseNpgsql(dataSource); });
+        // var connectionString = configuration.GetConnectionString("DefaultConnection");
+        // var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        // dataSourceBuilder.UseNodaTime();
+        // var dataSource = dataSourceBuilder.Build();
+        // services.AddDbContext<InspectorGadgetDbContext>(options => { options.UseNpgsql(dataSource); });
 
         // services.AddScoped<IApplicationDbContext, InspectorGadgetDbContext>();
 
@@ -51,8 +49,8 @@ public static class DependencyInjection
         });
 
 
-        services.AddSingleton<IAppDbContextProvider, AppDbContextProvider>();
-        //services.AddScoped<IAppDbContextProvider, AppDbContextProvider>();
+        // services.AddSingleton<IAppDbContextProvider, AppDbContextProvider>();
+        services.AddScoped<IAppDbContextProvider, AppDbContextProvider>();
 
         // Add authentication
         services.AddAuthentication(x =>
@@ -77,9 +75,9 @@ public static class DependencyInjection
         });
 
         // Add services
-        services.AddSingleton<JwtService>();
-        services.AddSingleton<IAuthorizationService, AuthorizationService>();
-        services.AddSingleton<IIdentityService, IdentityService>();
+        services.AddScoped<JwtService>();
+        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IAuthorizationService, AuthorizationService>();
 
         return services;
     }

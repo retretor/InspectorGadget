@@ -29,7 +29,7 @@ public class RepairRequestController : ControllerBase
     }
 
     [HttpGet]
-    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.RECEPTIONIST, Role.MASTER })]
+    [RequiresClaim(ClaimTypes.Role, new[] { Role.ADMIN, Role.RECEPTIONIST, Role.MASTER, Role.CLIENT })]
     public async Task<IActionResult> GetAll([FromQuery] GetAllRepairRequestsQuery command)
     {
         var (result, entities) = await _mediator.Send(command);

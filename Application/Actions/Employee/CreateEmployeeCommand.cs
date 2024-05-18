@@ -1,7 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
-using AutoMapper;
 using Domain.Enums;
 using FluentValidation;
 using MediatR;
@@ -31,10 +30,11 @@ public class CreateEmployeeHandler : BaseHandler, IRequestHandler<CreateEmployee
     public async Task<(Result, int?)> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
     {
         var dbUserId = await Task.Run(() => DbContext.CreateEmployee(request.FirstName, request.SecondName,
-            request.TelephoneNumber, request.ExperienceYears, request.YearsInCompany, request.Rating, request.Login,
-            request.PasswordHash, request.SecretKey, request.Role).SingleOrDefault(), cancellationToken);
+                request.TelephoneNumber, request.ExperienceYears, request.YearsInCompany, request.Rating, request.Login,
+                request.PasswordHash, request.SecretKey, request.Role, "default.jpg").SingleOrDefault(),
+            cancellationToken);
         return dbUserId == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.Employee), 0)), null)
+            ? (Result.Failure(new NotFoundException(nameof(Employee), 0)), null)
             : (Result.Success(), dbUserId.Result);
     }
 }

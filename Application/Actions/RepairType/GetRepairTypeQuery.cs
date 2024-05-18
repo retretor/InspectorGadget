@@ -28,7 +28,7 @@ public class GetRepairTypeHandler : BaseHandler,
     {
         var entity = await DbContext.RepairTypes.FindAsync(request.Id);
         return entity == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairType), request.Id)), null)
+            ? (Result.Failure(new NotFoundException(nameof(RepairType), request.Id)), null)
             : (Result.Success(), entity);
     }
 }

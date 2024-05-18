@@ -1,5 +1,4 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Interfaces;
+﻿using Application.Common.Interfaces;
 using Application.Common.Models;
 using AutoMapper;
 using Domain.Enums;
@@ -26,6 +25,7 @@ public class CreateDeviceHandler : BaseHandler, IRequestHandler<CreateDeviceComm
     public async Task<(Result, int?)> Handle(CreateDeviceCommand request, CancellationToken cancellationToken)
     {
         var entity = Mapper!.Map<Domain.Entities.Basic.Device>(request);
+        entity.PhotoPath = "default.jpg";
         DbContext.Devices.Add(entity);
         await DbContext.SaveChangesAsync(cancellationToken);
         return (Result.Success(), entity.EntityId);

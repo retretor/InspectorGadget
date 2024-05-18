@@ -11,6 +11,7 @@ public class Employee : BaseEntity
     public int YearsInCompany { get; set; }
     public int Rating { get; set; }
     public int DbUserId { get; set; }
+    public string PhotoPath { get; set; } = null!;
 
     public virtual ICollection<AllowedRepairTypesForEmployee> AllowedRepairTypesForEmployees { get; set; } =
         new List<AllowedRepairTypesForEmployee>();

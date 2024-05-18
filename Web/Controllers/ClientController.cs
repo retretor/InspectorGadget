@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Application.Actions.Authorization.AuthorizeByLogin;
 using Application.Actions.Client;
 using Application.Common.Exceptions;
 using Application.Common.Models;
@@ -26,13 +27,16 @@ public class ClientController : ControllerBase
     [RequiresClaim(ClaimTypes.Role, new[] { Role.CLIENT, Role.ADMIN, Role.RECEPTIONIST })]
     public async Task<IActionResult> Get(int id)
     {
+        var userId = User.Claims.First(c => c.Type == ClaimTypes.Sid).Value;
+        Console.WriteLine($"User with id: {userId} tried to access to client with id: {id}");
         if (User.Claims.First(c => c.Type == ClaimTypes.Role).Value == Role.CLIENT.ToString() &&
-            User.Claims.Any(c => c.Type == ClaimTypes.NameIdentifier && c.Value != id.ToString()))
+            User.Claims.Any(c => c.Type == ClaimTypes.Sid && c.Value != id.ToString()))
         {
+            Console.WriteLine("Access denied");
             return BadRequest(Result.Failure(new AccessDeniedException()));
         }
 
-        var (result, entity) = await _mediator.Send(new GetClientQuery { Id = id });
+        var (result, entity) = await _mediator.Send(new GetClientQuery { DbUserId = id });
         return result.Succeeded ? Ok(entity) : BadRequest(result);
     }
 
@@ -54,7 +58,14 @@ public class ClientController : ControllerBase
             return BadRequest(result);
         }
 
-        return CreatedAtAction(nameof(Get), new { id }, id);
+        var authorizeByLoginQuery = new AuthorizeByLoginQuery
+        {
+            Login = command.Login,
+            Password = command.PasswordHash
+        };
+        (result, var response) = await _mediator.Send(authorizeByLoginQuery);
+
+        return result.Succeeded ? Ok(response) : BadRequest(result);
     }
 
     [HttpPut]

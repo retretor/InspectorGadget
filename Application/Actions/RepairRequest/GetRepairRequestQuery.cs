@@ -31,7 +31,7 @@ public class
     {
         var entity = await DbContext.RepairRequests.FindAsync(request.Id);
         return entity == null
-            ? (Result.Failure(new NotFoundException(nameof(Domain.Entities.Basic.RepairRequest), request.Id)), null)
+            ? (Result.Failure(new NotFoundException(nameof(RepairRequest), request.Id)), null)
             : (Result.Success(), entity);
     }
 }
